@@ -6,7 +6,7 @@ import 'package:culina/data/services/recipe_api_service.dart';
 
 void main() {
   group('TheMealDB API Service Tests', () {
-    test('RecipeApiService parses TheMealDB response correctly into RecipeModel', () async {
+    test('RecipeApiService translates TheMealDB response into Spanish RecipeModel', () async {
       final mockJson = jsonEncode({
         'meals': [
           {
@@ -14,7 +14,7 @@ void main() {
             'strMeal': 'Mediterranean Pasta Salad',
             'strCategory': 'Pasta',
             'strArea': 'Italian',
-            'strInstructions': 'Cook pasta.\r\nChop tomatoes.\r\nMix together.',
+            'strInstructions': 'Cook for 10 minutes.\r\nChop the tomatoes.\r\nMix well all ingredients.',
             'strIngredient1': 'Pasta',
             'strMeasure1': '200 g',
             'strIngredient2': 'Tomatoes',
@@ -37,14 +37,18 @@ void main() {
 
       final recipe = recipes.first;
       expect(recipe.id, 'mealdb-52777');
-      expect(recipe.title, 'Mediterranean Pasta Salad');
+      expect(recipe.title, 'Ensalada de Pasta Mediterránea');
       expect(recipe.category, 'Pastas');
       expect(recipe.icon, '🍝');
+      expect(recipe.author, 'Cocina Italiana');
       expect(recipe.ingredients.length, 2);
-      expect(recipe.ingredients[0].name, 'Pasta');
+      expect(recipe.ingredients[0].name, 'Pasta seca artesanal');
       expect(recipe.ingredients[0].baseAmount, 200.0);
-      expect(recipe.ingredients[0].unit, 'g');
+      expect(recipe.ingredients[0].unit, 'gramos');
+      expect(recipe.ingredients[1].name, 'Tomates maduros');
       expect(recipe.steps.length, 3);
+      expect(recipe.steps[0].contains('minutos'), true);
+      expect(recipe.steps[2].contains('Mezcla'), true);
     });
   });
 }

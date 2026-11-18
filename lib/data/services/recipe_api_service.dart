@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import '../../domain/entities/ingredient.dart';
 import '../models/recipe_model.dart';
 import 'api_config.dart';
+import 'culinary_translator.dart';
 
 class RecipeApiService {
   final http.Client client;
@@ -57,8 +58,10 @@ class RecipeApiService {
   RecipeModel _parseMealDbItem(Map<String, dynamic> item) {
     final rawId = item['idMeal']?.toString() ?? DateTime.now().millisecondsSinceEpoch.toString();
     final id = 'mealdb-$rawId';
-    final title = (item['strMeal'] as String?)?.trim() ?? 'Receta Gourmet';
+    final rawTitle = (item['strMeal'] as String?)?.trim() ?? 'Receta Gourmet';
+    final title = CulinaryTranslator.translateTitle(rawTitle);
     final area = (item['strArea'] as String?)?.trim() ?? '';
+    final areaSpanish = CulinaryTranslator.translateArea(area);
     final rawCategory = (item['strCategory'] as String?)?.trim() ?? 'Almuerzos';
 
     // Clasificación a las categorías de Culina
@@ -93,7 +96,7 @@ class RecipeApiService {
       colorTheme = 'Olivo';
     }
 
-    // Extracción de ingredientes y cantidades
+    // Extracción y traducción de ingredientes y cantidades
     final List<Ingredient> ingredients = [];
     for (int i = 1; i <= 20; i++) {
       final name = item['strIngredient$i'] as String?;
@@ -104,9 +107,8 @@ class RecipeApiService {
         final cleanMeasure = (measure ?? '').trim();
 
         double baseAmount = 1;
-        String unit = cleanMeasure;
+        String rawUnit = cleanMeasure;
 
-        // Intentar parsear número al inicio de la medida
         final match = RegExp(r'^(\d+(?:\.\d+)?|\d+/\d+)').firstMatch(cleanMeasure);
         if (match != null) {
           final numberPart = match.group(1)!;
@@ -118,33 +120,40 @@ class RecipeApiService {
           } else {
             baseAmount = double.tryParse(numberPart) ?? 1;
           }
-          unit = cleanMeasure.substring(match.end).trim();
-          if (unit.isEmpty) unit = 'unidades';
+          rawUnit = cleanMeasure.substring(match.end).trim();
+          if (rawUnit.isEmpty) rawUnit = 'unidades';
         } else {
-          unit = cleanMeasure.isNotEmpty ? cleanMeasure : 'al gusto';
+          rawUnit = cleanMeasure.isNotEmpty ? cleanMeasure : 'al gusto';
         }
+
+        final translatedName = CulinaryTranslator.translateIngredientName(cleanName);
+        final translatedUnit = CulinaryTranslator.translateUnit(rawUnit);
 
         ingredients.add(
           Ingredient(
-            name: cleanName,
+            name: translatedName,
             baseAmount: baseAmount > 0 ? baseAmount : 1,
-            unit: unit,
+            unit: translatedUnit,
           ),
         );
       }
     }
 
-    // Extracción de pasos de preparación
+    // Extracción y traducción de pasos de preparación
     final instructions = item['strInstructions'] as String? ?? '';
-    final steps = instructions
+    final rawSteps = instructions
         .split(RegExp(r'\r?\n'))
         .map((s) => s.trim())
         .where((s) => s.isNotEmpty && s.length > 5 && !RegExp(r'^(step\s*\d+|paso\s*\d+)', caseSensitive: false).hasMatch(s))
         .toList();
 
-    final finalSteps = steps.isNotEmpty
-        ? steps
-        : [instructions.isNotEmpty ? instructions : 'Preparar los ingredientes y cocinar siguiendo la técnica tradicional.'];
+    final translatedSteps = rawSteps.isNotEmpty
+        ? rawSteps.map((s) => CulinaryTranslator.translateInstructionStep(s)).toList()
+        : [
+            instructions.isNotEmpty
+                ? CulinaryTranslator.translateInstructionStep(instructions)
+                : 'Preparar los ingredientes frescos y cocinar siguiendo la técnica tradicional.'
+          ];
 
     final difficulty = ingredients.length <= 6
         ? 'Fácil'
@@ -153,13 +162,13 @@ class RecipeApiService {
             : 'Difícil';
 
     final prepTime = (10 + (ingredients.length * 1.5).round()).clamp(10, 40);
-    final cookTime = (15 + (finalSteps.length * 2.5).round()).clamp(10, 50);
+    final cookTime = (15 + (translatedSteps.length * 2.5).round()).clamp(10, 50);
 
     return RecipeModel(
       id: id,
       title: title,
-      subtitle: area.isNotEmpty ? 'Especialidad tradicional de cocina $area' : 'Receta artesanal internacional',
-      description: 'Plato clásico con ingredientes frescos y preparación detallada para lograr la mejor textura y sabor.',
+      subtitle: CulinaryTranslator.translateSubtitle(area, category),
+      description: CulinaryTranslator.translateDescription(area, category),
       category: category,
       difficulty: difficulty,
       prepTime: prepTime,
@@ -167,14 +176,14 @@ class RecipeApiService {
       servings: 4,
       icon: icon,
       colorTheme: colorTheme,
-      author: area.isNotEmpty ? 'Cocina $area' : 'TheMealDB Chef',
+      author: areaSpanish.isNotEmpty ? 'Cocina $areaSpanish' : 'TheMealDB Chef',
       isFavorite: false,
       isFeatured: false,
       isUserCreated: false,
       ingredients: ingredients.isNotEmpty
           ? ingredients
           : [Ingredient(name: 'Ingredientes tradicionales', baseAmount: 1, unit: 'porción')],
-      steps: finalSteps,
+      steps: translatedSteps,
       createdAt: DateTime.now(),
     );
   }

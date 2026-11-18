@@ -49,7 +49,7 @@ lib/
 ### Estrategia de Conectividad Híbrida y API REST (TheMealDB + Offline-First con Fallback)
 El proyecto implementa una capa de integración REST activa conectada a **TheMealDB API** (`https://www.themealdb.com/api/json/v1/1/`):
 * **Configuración centralizada (`lib/data/services/api_config.dart`)**: Define los endpoints de búsqueda (`search.php`), detalle (`lookup.php`) y categorías.
-* **Adaptador de Datos (`lib/data/services/recipe_api_service.dart`)**: Normaliza la respuesta de TheMealDB mapeando ingredientes dinámicos (`strIngredient1..20`), medidas, tiempos estimados, cálculo de dificultad e instrucciones paso a paso al modelo unificado de Culina.
+* **Adaptador y Traductor Culinario (`lib/data/services/culinary_translator.dart` y `recipe_api_service.dart`)**: Dado que TheMealDB entrega sus recetas en inglés, se implementó un motor de traducción culinaria que traduce automáticamente al español los títulos, orígenes gastronómicos, ingredientes (`strIngredient1..20`), unidades métricas (`strMeasure1..20`) y las instrucciones paso a paso.
 * **Sincronización y Tolerancia a Fallos (`RecipeRepositoryImpl`)**: Combina en tiempo real las recetas creadas localmente por el usuario con el catálogo internacional de la API. Si el dispositivo pierde la conexión a internet, la aplicación conmuta de inmediato a la base de datos local persistente (`RecipeLocalService`) sin interrumpir la navegación.
 
 ---
