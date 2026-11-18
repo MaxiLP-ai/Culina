@@ -12,7 +12,69 @@ class RecipeApiService {
 
   Future<List<RecipeModel>?> fetchRecipes({String query = ''}) async {
     try {
-      final uri = Uri.parse('${ApiConfig.theMealDbBaseUrl}${ApiConfig.searchEndpoint}$query');
+      if (query.trim().isNotEmpty) {
+        final uri = Uri.parse(
+          '${ApiConfig.theMealDbBaseUrl}${ApiConfig.searchEndpoint}${Uri.encodeComponent(query.trim())}',
+        );
+        final response = await client
+            .get(uri, headers: ApiConfig.defaultHeaders)
+            .timeout(ApiConfig.requestTimeout);
+
+        if (response.statusCode == 200) {
+          final dynamic decoded = jsonDecode(response.body);
+          if (decoded is Map<String, dynamic> && decoded['meals'] != null) {
+            final List<dynamic> meals = decoded['meals'];
+            return meals
+                .map((item) => _parseMealDbItem(item as Map<String, dynamic>))
+                .toList();
+          }
+        }
+        return [];
+      }
+
+      // Consulta múltiple concurrente para obtener un catálogo amplio y variado (100+ recetas)
+      final letters = ['p', 'b', 'c', 's', 'm'];
+      final results = await Future.wait(
+        letters.map((letter) => _fetchByLetter(letter)),
+      );
+
+      final Map<String, RecipeModel> uniqueMap = {};
+      for (final list in results) {
+        if (list != null) {
+          for (final recipe in list) {
+            uniqueMap[recipe.id] = recipe;
+          }
+        }
+      }
+
+      if (uniqueMap.isNotEmpty) {
+        return uniqueMap.values.toList();
+      }
+
+      // Respaldo simple a endpoint estándar
+      final uri = Uri.parse('${ApiConfig.theMealDbBaseUrl}${ApiConfig.searchEndpoint}');
+      final response = await client
+          .get(uri, headers: ApiConfig.defaultHeaders)
+          .timeout(ApiConfig.requestTimeout);
+
+      if (response.statusCode == 200) {
+        final dynamic decoded = jsonDecode(response.body);
+        if (decoded is Map<String, dynamic> && decoded['meals'] != null) {
+          final List<dynamic> meals = decoded['meals'];
+          return meals
+              .map((item) => _parseMealDbItem(item as Map<String, dynamic>))
+              .toList();
+        }
+      }
+      return null;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<List<RecipeModel>?> _fetchByLetter(String letter) async {
+    try {
+      final uri = Uri.parse('${ApiConfig.theMealDbBaseUrl}/search.php?f=$letter');
       final response = await client
           .get(uri, headers: ApiConfig.defaultHeaders)
           .timeout(ApiConfig.requestTimeout);

@@ -30,7 +30,7 @@ void main() {
       });
 
       final service = RecipeApiService(client: mockClient);
-      final recipes = await service.fetchRecipes();
+      final recipes = await service.fetchRecipes(query: 'pasta');
 
       expect(recipes, isNotNull);
       expect(recipes!.length, 1);
