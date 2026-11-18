@@ -7,6 +7,7 @@ import 'data/services/auth_service.dart';
 import 'data/services/recipe_local_service.dart';
 import 'domain/repositories/recipe_repository.dart';
 import 'presentation/providers/recipe_provider.dart';
+import 'presentation/providers/theme_provider.dart';
 import 'presentation/providers/user_provider.dart';
 import 'presentation/screens/splash_screen.dart';
 import 'presentation/theme/app_theme.dart';
@@ -14,7 +15,6 @@ import 'presentation/theme/app_theme.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Set system UI overlay style matching the Figma Android look
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
@@ -30,11 +30,13 @@ void main() async {
 class CulinaApp extends StatelessWidget {
   final RecipeRepository? recipeRepository;
   final AuthService? authService;
+  final ThemeProvider? themeProvider;
 
   const CulinaApp({
     super.key,
     this.recipeRepository,
     this.authService,
+    this.themeProvider,
   });
 
   @override
@@ -45,6 +47,9 @@ class CulinaApp extends StatelessWidget {
 
     return MultiProvider(
       providers: [
+        ChangeNotifierProvider<ThemeProvider>(
+          create: (_) => themeProvider ?? ThemeProvider(),
+        ),
         ChangeNotifierProvider<RecipeProvider>(
           create: (_) => RecipeProvider(repository: effectiveRepo),
         ),
@@ -52,11 +57,17 @@ class CulinaApp extends StatelessWidget {
           create: (_) => UserProvider(authService: effectiveAuth),
         ),
       ],
-      child: MaterialApp(
-        title: 'Culina',
-        debugShowCheckedModeBanner: false,
-        theme: AppTheme.lightTheme,
-        home: const SplashScreen(),
+      child: Consumer<ThemeProvider>(
+        builder: (context, themeProv, _) {
+          return MaterialApp(
+            title: 'Culina',
+            debugShowCheckedModeBanner: false,
+            theme: AppTheme.lightTheme,
+            darkTheme: AppTheme.darkTheme,
+            themeMode: themeProv.themeMode,
+            home: const SplashScreen(),
+          );
+        },
       ),
     );
   }
