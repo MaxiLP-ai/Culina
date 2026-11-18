@@ -15,29 +15,43 @@ class RecipeRepositoryImpl implements RecipeRepository {
 
   @override
   Future<List<Recipe>> getAllRecipes() async {
-    // Si la API remota está configurada, se sincronizan las recetas
+    final localList = await localService.loadRecipes();
+    final userCreated = localList.where((r) => r.isUserCreated).toList();
+    final favoriteIds = localList.where((r) => r.isFavorite).map((r) => r.id).toSet();
+
+    // Consultamos la API externa (TheMealDB)
     if (apiService != null) {
       final remoteList = await apiService!.fetchRecipes();
       if (remoteList != null && remoteList.isNotEmpty) {
-        await localService.saveAllRecipes(remoteList);
-        return List<Recipe>.from(remoteList);
+        final adjustedRemote = remoteList.map((r) {
+          if (favoriteIds.contains(r.id)) {
+            return r.copyWith(isFavorite: true);
+          }
+          return r;
+        }).toList();
+
+        // Mantenemos al inicio las recetas creadas por el usuario y luego las de la API
+        final combined = <Recipe>[...userCreated, ...adjustedRemote];
+        return combined;
       }
     }
-    // Si la API no está configurada aún o no hay conexión, recurre a la BD local
-    final list = await localService.loadRecipes();
-    return List<Recipe>.from(list);
+
+    // Fallback elegante a la base de datos local
+    return List<Recipe>.from(localList);
   }
 
   @override
   Future<Recipe?> getRecipeById(String id) async {
-    if (apiService != null) {
-      final remoteRecipe = await apiService!.fetchRecipeById(id);
-      if (remoteRecipe != null) return remoteRecipe;
-    }
     final list = await localService.loadRecipes();
     for (final r in list) {
       if (r.id == id) return r;
     }
+
+    if (apiService != null) {
+      final remoteRecipe = await apiService!.fetchRecipeById(id);
+      if (remoteRecipe != null) return remoteRecipe;
+    }
+
     return null;
   }
 
@@ -47,10 +61,6 @@ class RecipeRepositoryImpl implements RecipeRepository {
     final model = RecipeModel.fromEntity(recipe);
     list.insert(0, model);
     await localService.saveAllRecipes(list);
-
-    if (apiService != null) {
-      await apiService!.createRecipe(model);
-    }
     return model;
   }
 
@@ -65,10 +75,6 @@ class RecipeRepositoryImpl implements RecipeRepository {
       list.insert(0, model);
     }
     await localService.saveAllRecipes(list);
-
-    if (apiService != null) {
-      await apiService!.updateRecipe(model);
-    }
     return model;
   }
 
@@ -79,9 +85,6 @@ class RecipeRepositoryImpl implements RecipeRepository {
     list.removeWhere((r) => r.id == id);
     if (list.length != initialCount) {
       await localService.saveAllRecipes(list);
-      if (apiService != null) {
-        await apiService!.deleteRecipe(id);
-      }
       return true;
     }
     return false;
@@ -91,13 +94,24 @@ class RecipeRepositoryImpl implements RecipeRepository {
   Future<Recipe> toggleFavorite(String id) async {
     final list = await localService.loadRecipes();
     final index = list.indexWhere((r) => r.id == id);
-    if (index == -1) {
-      throw Exception('Receta no encontrada');
+    if (index != -1) {
+      final current = list[index];
+      final updated = current.copyWith(isFavorite: !current.isFavorite);
+      list[index] = RecipeModel.fromEntity(updated);
+      await localService.saveAllRecipes(list);
+      return updated;
     }
-    final current = list[index];
-    final updated = current.copyWith(isFavorite: !current.isFavorite);
-    list[index] = RecipeModel.fromEntity(updated);
-    await localService.saveAllRecipes(list);
-    return updated;
+
+    if (apiService != null) {
+      final remote = await apiService!.fetchRecipeById(id);
+      if (remote != null) {
+        final favorited = remote.copyWith(isFavorite: true);
+        list.add(RecipeModel.fromEntity(favorited));
+        await localService.saveAllRecipes(list);
+        return favorited;
+      }
+    }
+
+    throw Exception('Receta no encontrada');
   }
 }

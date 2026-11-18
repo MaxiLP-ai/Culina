@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import '../../domain/entities/ingredient.dart';
 import '../models/recipe_model.dart';
 import 'api_config.dart';
 
@@ -8,19 +9,21 @@ class RecipeApiService {
 
   RecipeApiService({http.Client? client}) : client = client ?? http.Client();
 
-  Future<List<RecipeModel>?> fetchRecipes() async {
-    if (!ApiConfig.isConfigured) return null;
-
+  Future<List<RecipeModel>?> fetchRecipes({String query = ''}) async {
     try {
-      final uri = Uri.parse('${ApiConfig.baseUrl}${ApiConfig.recipesEndpoint}');
+      final uri = Uri.parse('${ApiConfig.theMealDbBaseUrl}${ApiConfig.searchEndpoint}$query');
       final response = await client
           .get(uri, headers: ApiConfig.defaultHeaders)
           .timeout(ApiConfig.requestTimeout);
 
       if (response.statusCode == 200) {
         final dynamic decoded = jsonDecode(response.body);
-        final List<dynamic> list = decoded is List ? decoded : (decoded['data'] ?? []);
-        return list.map((item) => RecipeModel.fromMap(item as Map<String, dynamic>)).toList();
+        if (decoded is Map<String, dynamic> && decoded['meals'] != null) {
+          final List<dynamic> meals = decoded['meals'];
+          return meals
+              .map((item) => _parseMealDbItem(item as Map<String, dynamic>))
+              .toList();
+        }
       }
       return null;
     } catch (_) {
@@ -29,20 +32,21 @@ class RecipeApiService {
   }
 
   Future<RecipeModel?> fetchRecipeById(String id) async {
-    if (!ApiConfig.isConfigured) return null;
-
     try {
-      final uri = Uri.parse('${ApiConfig.baseUrl}${ApiConfig.recipesEndpoint}/$id');
+      final cleanId = id.startsWith('mealdb-') ? id.replaceFirst('mealdb-', '') : id;
+      final uri = Uri.parse('${ApiConfig.theMealDbBaseUrl}${ApiConfig.lookupEndpoint}$cleanId');
       final response = await client
           .get(uri, headers: ApiConfig.defaultHeaders)
           .timeout(ApiConfig.requestTimeout);
 
       if (response.statusCode == 200) {
         final dynamic decoded = jsonDecode(response.body);
-        final Map<String, dynamic> data = decoded is Map<String, dynamic> && decoded.containsKey('data')
-            ? decoded['data']
-            : decoded;
-        return RecipeModel.fromMap(data);
+        if (decoded is Map<String, dynamic> && decoded['meals'] != null) {
+          final List<dynamic> meals = decoded['meals'];
+          if (meals.isNotEmpty) {
+            return _parseMealDbItem(meals.first as Map<String, dynamic>);
+          }
+        }
       }
       return null;
     } catch (_) {
@@ -50,70 +54,128 @@ class RecipeApiService {
     }
   }
 
-  Future<RecipeModel?> createRecipe(RecipeModel recipe) async {
-    if (!ApiConfig.isConfigured) return null;
+  RecipeModel _parseMealDbItem(Map<String, dynamic> item) {
+    final rawId = item['idMeal']?.toString() ?? DateTime.now().millisecondsSinceEpoch.toString();
+    final id = 'mealdb-$rawId';
+    final title = (item['strMeal'] as String?)?.trim() ?? 'Receta Gourmet';
+    final area = (item['strArea'] as String?)?.trim() ?? '';
+    final rawCategory = (item['strCategory'] as String?)?.trim() ?? 'Almuerzos';
 
-    try {
-      final uri = Uri.parse('${ApiConfig.baseUrl}${ApiConfig.recipesEndpoint}');
-      final response = await client
-          .post(
-            uri,
-            headers: ApiConfig.defaultHeaders,
-            body: jsonEncode(recipe.toMap()),
-          )
-          .timeout(ApiConfig.requestTimeout);
+    // Clasificación a las categorías de Culina
+    String category = 'Almuerzos';
+    final catLower = rawCategory.toLowerCase();
+    if (catLower.contains('pasta')) {
+      category = 'Pastas';
+    } else if (catLower.contains('breakfast')) {
+      category = 'Desayunos';
+    } else if (catLower.contains('dessert')) {
+      category = 'Postres';
+    } else if (catLower.contains('salad') || catLower.contains('side')) {
+      category = 'Ensaladas';
+    } else {
+      category = 'Almuerzos';
+    }
 
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        final dynamic decoded = jsonDecode(response.body);
-        final Map<String, dynamic> data = decoded is Map<String, dynamic> && decoded.containsKey('data')
-            ? decoded['data']
-            : decoded;
-        return RecipeModel.fromMap(data);
+    // Icono y tema visual artesanal
+    String icon = '🍲';
+    String colorTheme = 'Terracota';
+    if (category == 'Pastas') {
+      icon = '🍝';
+      colorTheme = 'Trigo';
+    } else if (category == 'Desayunos') {
+      icon = '🥐';
+      colorTheme = 'Trigo';
+    } else if (category == 'Postres') {
+      icon = '🍰';
+      colorTheme = 'Cacao';
+    } else if (category == 'Ensaladas') {
+      icon = '🥗';
+      colorTheme = 'Olivo';
+    }
+
+    // Extracción de ingredientes y cantidades
+    final List<Ingredient> ingredients = [];
+    for (int i = 1; i <= 20; i++) {
+      final name = item['strIngredient$i'] as String?;
+      final measure = item['strMeasure$i'] as String?;
+
+      if (name != null && name.trim().isNotEmpty) {
+        final cleanName = name.trim();
+        final cleanMeasure = (measure ?? '').trim();
+
+        double baseAmount = 1;
+        String unit = cleanMeasure;
+
+        // Intentar parsear número al inicio de la medida
+        final match = RegExp(r'^(\d+(?:\.\d+)?|\d+/\d+)').firstMatch(cleanMeasure);
+        if (match != null) {
+          final numberPart = match.group(1)!;
+          if (numberPart.contains('/')) {
+            final parts = numberPart.split('/');
+            final num = double.tryParse(parts[0]) ?? 1;
+            final den = double.tryParse(parts[1]) ?? 1;
+            baseAmount = num / den;
+          } else {
+            baseAmount = double.tryParse(numberPart) ?? 1;
+          }
+          unit = cleanMeasure.substring(match.end).trim();
+          if (unit.isEmpty) unit = 'unidades';
+        } else {
+          unit = cleanMeasure.isNotEmpty ? cleanMeasure : 'al gusto';
+        }
+
+        ingredients.add(
+          Ingredient(
+            name: cleanName,
+            baseAmount: baseAmount > 0 ? baseAmount : 1,
+            unit: unit,
+          ),
+        );
       }
-      return null;
-    } catch (_) {
-      return null;
     }
-  }
 
-  Future<RecipeModel?> updateRecipe(RecipeModel recipe) async {
-    if (!ApiConfig.isConfigured) return null;
+    // Extracción de pasos de preparación
+    final instructions = item['strInstructions'] as String? ?? '';
+    final steps = instructions
+        .split(RegExp(r'\r?\n'))
+        .map((s) => s.trim())
+        .where((s) => s.isNotEmpty && s.length > 5 && !RegExp(r'^(step\s*\d+|paso\s*\d+)', caseSensitive: false).hasMatch(s))
+        .toList();
 
-    try {
-      final uri = Uri.parse('${ApiConfig.baseUrl}${ApiConfig.recipesEndpoint}/${recipe.id}');
-      final response = await client
-          .put(
-            uri,
-            headers: ApiConfig.defaultHeaders,
-            body: jsonEncode(recipe.toMap()),
-          )
-          .timeout(ApiConfig.requestTimeout);
+    final finalSteps = steps.isNotEmpty
+        ? steps
+        : [instructions.isNotEmpty ? instructions : 'Preparar los ingredientes y cocinar siguiendo la técnica tradicional.'];
 
-      if (response.statusCode == 200) {
-        final dynamic decoded = jsonDecode(response.body);
-        final Map<String, dynamic> data = decoded is Map<String, dynamic> && decoded.containsKey('data')
-            ? decoded['data']
-            : decoded;
-        return RecipeModel.fromMap(data);
-      }
-      return null;
-    } catch (_) {
-      return null;
-    }
-  }
+    final difficulty = ingredients.length <= 6
+        ? 'Fácil'
+        : ingredients.length <= 11
+            ? 'Media'
+            : 'Difícil';
 
-  Future<bool?> deleteRecipe(String id) async {
-    if (!ApiConfig.isConfigured) return null;
+    final prepTime = (10 + (ingredients.length * 1.5).round()).clamp(10, 40);
+    final cookTime = (15 + (finalSteps.length * 2.5).round()).clamp(10, 50);
 
-    try {
-      final uri = Uri.parse('${ApiConfig.baseUrl}${ApiConfig.recipesEndpoint}/$id');
-      final response = await client
-          .delete(uri, headers: ApiConfig.defaultHeaders)
-          .timeout(ApiConfig.requestTimeout);
-
-      return response.statusCode == 200 || response.statusCode == 204;
-    } catch (_) {
-      return null;
-    }
+    return RecipeModel(
+      id: id,
+      title: title,
+      subtitle: area.isNotEmpty ? 'Especialidad tradicional de cocina $area' : 'Receta artesanal internacional',
+      description: 'Plato clásico con ingredientes frescos y preparación detallada para lograr la mejor textura y sabor.',
+      category: category,
+      difficulty: difficulty,
+      prepTime: prepTime,
+      cookTime: cookTime,
+      servings: 4,
+      icon: icon,
+      colorTheme: colorTheme,
+      author: area.isNotEmpty ? 'Cocina $area' : 'TheMealDB Chef',
+      isFavorite: false,
+      isFeatured: false,
+      isUserCreated: false,
+      ingredients: ingredients.isNotEmpty
+          ? ingredients
+          : [Ingredient(name: 'Ingredientes tradicionales', baseAmount: 1, unit: 'porción')],
+      steps: finalSteps,
+      createdAt: DateTime.now(),
+    );
   }
 }
