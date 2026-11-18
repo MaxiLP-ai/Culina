@@ -97,3 +97,4 @@ git push -u origin feature/nombre-de-tu-tarea
    - Si un método `build()` supera las 100 líneas, extrae sub-widgets o componentes dedicados en `presentation/widgets/`.
 5. **Cero Logs en Producción**:
    - No dejes `print()` ni código comentado en las ramas principales.
+

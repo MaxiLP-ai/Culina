@@ -25,3 +25,4 @@
 
 ## 📸 Evidencia Visual (si aplica)
 <!-- Adjunta capturas de pantalla o gifs si hubo cambios en la interfaz de usuario -->
+

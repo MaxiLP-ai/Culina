@@ -40,6 +40,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
       ),
       builder: (ctx) {
         String? tempDifficulty = provider.filterDifficulty;
+        int? tempMaxTime = provider.filterMaxTime;
 
         return StatefulBuilder(
           builder: (context, setModalState) {
@@ -97,14 +98,49 @@ class _ExploreScreenState extends State<ExploreScreen> {
                       );
                     }).toList(),
                   ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Tiempo Total Máximo',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Wrap(
+                    spacing: 8,
+                    children: [
+                      {'label': 'Todos', 'value': null},
+                      {'label': '< 15 min', 'value': 15},
+                      {'label': '< 30 min', 'value': 30},
+                      {'label': '< 45 min', 'value': 45},
+                    ].map((item) {
+                      final isSelected = tempMaxTime == item['value'];
+                      return ChoiceChip(
+                        label: Text(item['label'] as String),
+                        selected: isSelected,
+                        selectedColor: AppColors.darkButton,
+                        backgroundColor: const Color(0xFFF4EFEA),
+                        labelStyle: TextStyle(
+                          color: isSelected ? Colors.white : AppColors.textPrimary,
+                          fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                        ),
+                        onSelected: (selected) {
+                          setModalState(() {
+                            tempMaxTime = item['value'] as int?;
+                          });
+                        },
+                      );
+                    }).toList(),
+                  ),
                   const SizedBox(height: 24),
                   Row(
                     children: [
                       Expanded(
                         child: OutlinedButton(
                           onPressed: () {
-                            provider.setFilterDifficulty(null);
-                            provider.setSelectedCategory('Todas');
+                            provider.clearAllFilters();
                             Navigator.pop(context);
                           },
                           style: OutlinedButton.styleFrom(
@@ -123,6 +159,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
                         child: ElevatedButton(
                           onPressed: () {
                             provider.setFilterDifficulty(tempDifficulty);
+                            provider.setFilterMaxTime(tempMaxTime);
                             Navigator.pop(context);
                           },
                           style: ElevatedButton.styleFrom(

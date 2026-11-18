@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../domain/entities/recipe.dart';
 import '../providers/recipe_provider.dart';
+import '../providers/theme_provider.dart';
 import '../providers/user_provider.dart';
 import '../theme/app_theme.dart';
 import '../widgets/recipe_card_item.dart';
@@ -126,6 +127,7 @@ class ProfileScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final userProvider = context.watch<UserProvider>();
     final recipeProvider = context.watch<RecipeProvider>();
+    final themeProvider = context.watch<ThemeProvider>();
 
     final user = userProvider.user;
     final publishedRecipes = recipeProvider.userCreatedRecipes;
@@ -337,7 +339,77 @@ class ProfileScreen extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 16),
+
+              // Ajuste y Preferencia: Modo Oscuro Artesanal
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                decoration: BoxDecoration(
+                  color: themeProvider.isDarkMode ? AppColors.cardDark : Colors.white,
+                  borderRadius: BorderRadius.circular(18),
+                  border: Border.all(
+                    color: themeProvider.isDarkMode ? AppColors.borderDark : AppColors.border,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.02),
+                      blurRadius: 6,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 38,
+                      height: 38,
+                      decoration: BoxDecoration(
+                        color: themeProvider.isDarkMode ? const Color(0xFF2C2825) : const Color(0xFFF3EFE9),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Icon(
+                        themeProvider.isDarkMode ? Icons.dark_mode_rounded : Icons.light_mode_rounded,
+                        color: themeProvider.isDarkMode ? const Color(0xFFFACC15) : AppColors.darkButton,
+                        size: 20,
+                      ),
+                    ),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Modo Oscuro Artesanal',
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w700,
+                              color: themeProvider.isDarkMode ? AppColors.textPrimaryDark : AppColors.textPrimary,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            themeProvider.isDarkMode
+                                ? 'Ambiente cálido de baja luz para cocinar'
+                                : 'Tema claro rústico de papel pergamino',
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 11,
+                              color: themeProvider.isDarkMode ? AppColors.textSecondaryDark : AppColors.textMuted,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Switch(
+                      value: themeProvider.isDarkMode,
+                      activeColor: const Color(0xFFDDA743),
+                      onChanged: (val) {
+                        themeProvider.toggleTheme(val);
+                      },
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20),
 
               Row(
                 children: [

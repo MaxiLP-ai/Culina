@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../domain/entities/recipe.dart';
 import '../providers/recipe_provider.dart';
 import '../theme/app_theme.dart';
 import '../widgets/culina_food_graphic.dart';
+import 'cooking_mode_screen.dart';
 import 'create_recipe_screen.dart';
 
 class RecipeDetailScreen extends StatefulWidget {
@@ -30,10 +32,27 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
     _checkedIngredients = List.filled(widget.recipe.ingredients.length, false);
   }
 
-  void _shareRecipe() {
+  void _shareRecipe(Recipe recipe) {
+    final buffer = StringBuffer();
+    buffer.writeln('🍽️ ${recipe.title}');
+    if (recipe.subtitle.isNotEmpty) buffer.writeln('${recipe.subtitle}\n');
+    buffer.writeln('⏱️ Tiempo: ${recipe.totalTime} min (${recipe.prepTime}m prep / ${recipe.cookTime}m cocción)');
+    buffer.writeln('👨‍🍳 Dificultad: ${recipe.difficulty} | Porciones: $_currentServings\n');
+    buffer.writeln('🛒 Ingredientes:');
+    for (final ing in recipe.ingredients) {
+      final amount = ing.formatAmountForServings(recipe.servings, _currentServings);
+      buffer.writeln(' • ${ing.name}: $amount ${ing.unit}');
+    }
+    buffer.writeln('\n👨‍🍳 Pasos de preparación:');
+    for (var i = 0; i < recipe.steps.length; i++) {
+      buffer.writeln(' ${i + 1}. ${recipe.steps[i]}');
+    }
+    buffer.writeln('\n— Compartido desde Culina');
+
+    Clipboard.setData(ClipboardData(text: buffer.toString()));
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Enlace de "${widget.recipe.title}" copiado al portapapeles'),
+      const SnackBar(
+        content: Text('Ficha de receta e ingredientes copiada al portapapeles'),
         behavior: SnackBarBehavior.floating,
       ),
     );
@@ -67,7 +86,8 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
           IconButton(
             icon: const Icon(Icons.share_outlined, size: 20),
             color: AppColors.textPrimary,
-            onPressed: _shareRecipe,
+            tooltip: 'Compartir receta',
+            onPressed: () => _shareRecipe(currentRecipe),
           ),
           IconButton(
             icon: Icon(
@@ -525,6 +545,41 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                 ),
               ),
               const SizedBox(height: 20),
+
+              // Botón destacado para entrar al Modo Cocina interactivo
+              SizedBox(
+                width: double.infinity,
+                height: 52,
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => CookingModeScreen(
+                          recipe: currentRecipe,
+                          servings: _currentServings,
+                        ),
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.soup_kitchen_rounded, color: Colors.white, size: 22),
+                  label: Text(
+                    'Iniciar Modo Cocina Paso a Paso',
+                    style: GoogleFonts.plusJakartaSans(
+                      color: Colors.white,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.darkButton,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    elevation: 2,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
 
               if (currentRecipe.isUserCreated)
                 SizedBox(

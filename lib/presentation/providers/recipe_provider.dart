@@ -12,6 +12,7 @@ class RecipeProvider with ChangeNotifier {
   String _searchQuery = '';
   String _selectedCategory = 'Todas';
   String? _filterDifficulty;
+  int? _filterMaxTime;
 
   RecipeProvider({required this.repository}) {
     loadRecipes();
@@ -24,6 +25,7 @@ class RecipeProvider with ChangeNotifier {
   String get searchQuery => _searchQuery;
   String get selectedCategory => _selectedCategory;
   String? get filterDifficulty => _filterDifficulty;
+  int? get filterMaxTime => _filterMaxTime;
 
   List<Recipe> get filteredRecipes {
     return _recipes.where((recipe) {
@@ -35,6 +37,9 @@ class RecipeProvider with ChangeNotifier {
           _filterDifficulty == 'Todas' ||
           recipe.difficulty.toLowerCase() == _filterDifficulty!.toLowerCase();
 
+      final matchesTime = _filterMaxTime == null ||
+          (recipe.prepTime + recipe.cookTime) <= _filterMaxTime!;
+
       final query = _searchQuery.trim().toLowerCase();
       final matchesQuery = query.isEmpty ||
           recipe.title.toLowerCase().contains(query) ||
@@ -42,7 +47,7 @@ class RecipeProvider with ChangeNotifier {
           recipe.category.toLowerCase().contains(query) ||
           recipe.ingredients.any((i) => i.name.toLowerCase().contains(query));
 
-      return matchesCategory && matchesDifficulty && matchesQuery;
+      return matchesCategory && matchesDifficulty && matchesTime && matchesQuery;
     }).toList();
   }
 
@@ -136,6 +141,19 @@ class RecipeProvider with ChangeNotifier {
 
   void setFilterDifficulty(String? difficulty) {
     _filterDifficulty = difficulty;
+    notifyListeners();
+  }
+
+  void setFilterMaxTime(int? maxMinutes) {
+    _filterMaxTime = maxMinutes;
+    notifyListeners();
+  }
+
+  void clearAllFilters() {
+    _selectedCategory = 'Todas';
+    _filterDifficulty = null;
+    _filterMaxTime = null;
+    _searchQuery = '';
     notifyListeners();
   }
 
