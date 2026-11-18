@@ -1,21 +1,39 @@
 import '../../domain/entities/recipe.dart';
 import '../../domain/repositories/recipe_repository.dart';
 import '../models/recipe_model.dart';
+import '../services/recipe_api_service.dart';
 import '../services/recipe_local_service.dart';
 
 class RecipeRepositoryImpl implements RecipeRepository {
   final RecipeLocalService localService;
+  final RecipeApiService? apiService;
 
-  RecipeRepositoryImpl({required this.localService});
+  RecipeRepositoryImpl({
+    required this.localService,
+    this.apiService,
+  });
 
   @override
   Future<List<Recipe>> getAllRecipes() async {
+    // Si la API remota está configurada, se sincronizan las recetas
+    if (apiService != null) {
+      final remoteList = await apiService!.fetchRecipes();
+      if (remoteList != null && remoteList.isNotEmpty) {
+        await localService.saveAllRecipes(remoteList);
+        return List<Recipe>.from(remoteList);
+      }
+    }
+    // Si la API no está configurada aún o no hay conexión, recurre a la BD local
     final list = await localService.loadRecipes();
     return List<Recipe>.from(list);
   }
 
   @override
   Future<Recipe?> getRecipeById(String id) async {
+    if (apiService != null) {
+      final remoteRecipe = await apiService!.fetchRecipeById(id);
+      if (remoteRecipe != null) return remoteRecipe;
+    }
     final list = await localService.loadRecipes();
     for (final r in list) {
       if (r.id == id) return r;
@@ -29,6 +47,10 @@ class RecipeRepositoryImpl implements RecipeRepository {
     final model = RecipeModel.fromEntity(recipe);
     list.insert(0, model);
     await localService.saveAllRecipes(list);
+
+    if (apiService != null) {
+      await apiService!.createRecipe(model);
+    }
     return model;
   }
 
@@ -43,6 +65,10 @@ class RecipeRepositoryImpl implements RecipeRepository {
       list.insert(0, model);
     }
     await localService.saveAllRecipes(list);
+
+    if (apiService != null) {
+      await apiService!.updateRecipe(model);
+    }
     return model;
   }
 
@@ -53,6 +79,9 @@ class RecipeRepositoryImpl implements RecipeRepository {
     list.removeWhere((r) => r.id == id);
     if (list.length != initialCount) {
       await localService.saveAllRecipes(list);
+      if (apiService != null) {
+        await apiService!.deleteRecipe(id);
+      }
       return true;
     }
     return false;

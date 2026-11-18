@@ -28,7 +28,7 @@ lib/
 ├── data/
 │   ├── models/            # Serialización y deserialización de datos (RecipeModel, IngredientModel)
 │   ├── repositories/      # Implementación concreta de repositorios (RecipeRepositoryImpl)
-│   └── services/          # Fuentes de datos locales y simulación de backend (RecipeLocalService, AuthService)
+│   └── services/          # Fuentes de datos remotas y locales (RecipeApiService, ApiConfig, RecipeLocalService, AuthService)
 ├── domain/
 │   ├── entities/          # Entidades puras del negocio sin dependencias externas (Recipe, Ingredient, UserProfile)
 │   └── repositories/      # Contratos e interfaces abstractas (RecipeRepository)
@@ -45,6 +45,11 @@ lib/
 * **Rama `develop`**: Rama base de integración donde convergen los desarrollos y mejoras.
 * **Ramas de funcionalidad (`feature/*`)**: Ramas de trabajo individuales para cada componente o ajuste.
 * **Pull Requests**: Cada cambio se integra mediante PR con plantilla de revisión de código y validación de análisis estático (`flutter analyze`) y suite de pruebas (`flutter test`).
+
+### Estrategia de Conectividad Híbrida y API REST (Offline-First con Fallback)
+El proyecto implementa una capa de integración REST desacoplada (`RecipeApiService` y `ApiConfig`):
+* **Configuración centralizada (`lib/data/services/api_config.dart`)**: La URL base de la API se define en una única constante (`ApiConfig.baseUrl`) o mediante `--dart-define=API_URL=...`.
+* **Sincronización y Tolerancia a Fallos**: Si la URL de la API está configurada y responde, la app sincroniza los datos. Si la API aún no está conectada o el usuario no dispone de conexión a internet, la aplicación conmuta automáticamente al almacenamiento local persistente (`RecipeLocalService`) garantizando operatividad continua.
 
 ---
 
@@ -145,3 +150,4 @@ El proyecto cuenta con suites de pruebas unitarias y de widgets en el directorio
 
 ### Análisis Estático
 El proyecto mantiene **cero advertencias de linting** bajo las reglas recomendadas de Flutter y Dart (`flutter analyze`), asegurando buenas prácticas de Clean Code, variables tipadas, métodos puros y prevención de pérdidas de memoria con `dispose()` en controladores y temporizadores.
+

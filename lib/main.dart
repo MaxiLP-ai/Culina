@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import 'data/repositories/recipe_repository_impl.dart';
 import 'data/services/auth_service.dart';
+import 'data/services/recipe_api_service.dart';
 import 'data/services/recipe_local_service.dart';
 import 'domain/repositories/recipe_repository.dart';
 import 'presentation/providers/recipe_provider.dart';
@@ -42,7 +43,10 @@ class CulinaApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final effectiveRepo = recipeRepository ??
-        RecipeRepositoryImpl(localService: RecipeLocalService());
+        RecipeRepositoryImpl(
+          localService: RecipeLocalService(),
+          apiService: RecipeApiService(),
+        );
     final effectiveAuth = authService ?? AuthService();
 
     return MultiProvider(
