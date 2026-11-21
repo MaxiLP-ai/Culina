@@ -1,63 +1,253 @@
 class CulinaryTranslator {
+  // Diccionario exhaustivo de títulos exactos para platos internacionales frecuentes
   static final Map<String, String> _exactTitles = {
+    // Platos de Pasta y Cocina Italiana
     'mediterranean pasta salad': 'Ensalada de Pasta Mediterránea',
     'spaghetti bolognese': 'Espaguetis a la Boloñesa Tradicional',
     'lasagna': 'Lasaña Clásica Artesanal',
     'lasagne': 'Lasaña Tradicional al Horno',
     'fettuccine alfredo': 'Fettuccine Alfredo Cremoso',
     'arrabiata': 'Penne all’Arrabbiata con Tomates y Albahaca',
-    'chili con carne': 'Chili con Carne y Frijoles Rústico',
+    'pasta alla genovese': 'Pasta al Pesto Genovés con Albahaca',
+    'cacio e pepe': 'Espaguetis Cacio e Pepe con Pimienta Negra',
+    'carbonara': 'Espaguetis a la Carbonara Clásica',
+    'seafood pasta': 'Pasta Artesanal con Frutos de Mar',
+    'penne arrabiata': 'Penne all’Arrabbiata Picante',
+    'pilchard puttanesca': 'Pasta a la Puttanesca con Sardinas y Aceitunas',
+    'pizza express margherita': 'Pizza Margarita Artesanal con Albahaca',
+
+    // Carnes y Estofados (Beef & Meat)
+    'beef wellington': 'Solomillo de Res Wellington en Hojaldre',
+    'beef bourguignon': 'Estofado Bourguignon de Res al Vino Tinto',
+    'beef stroganoff': 'Stroganoff de Res con Champiñones',
     'beef and mustard pie': 'Pastel Rústico de Carne y Mostaza',
-    'beef brenton': 'Estofado de Carne Bourguignon',
-    'chicken & mushroom hotpot': 'Cazuela de Pollo y Champiñones',
+    'beef and oyster pie': 'Pastel Tradicional de Carne y Ostras',
+    'beef rendang': 'Rendang de Res Caramelizado con Coco',
+    'beef sunday roast': 'Asado Dominical Tradicional de Res',
+    'beef brisket pot roast': 'Asado a la Olla de Pecho de Res',
+    'beef dumpling stew': 'Estofado de Carne con Albóndigas Tiernas',
+    'beef pumpkin stew': 'Estofado de Carne con Calabaza Dulce',
+    'beef empanadas': 'Empanadas Criollas de Carne Caseras',
+    'beef lo mein': 'Fideos Lo Mein Salteados con Carne',
+    'beef pho': 'Sopa Tradicional Vietnamita Pho de Res',
+    'beef mechado': 'Carne Mechada en Salsa de Tomate',
+    'beef caldereta': 'Caldereta Filipina de Res con Pimientos',
+    'beef asado': 'Asado de Res a la Cacerola',
+    'beef and broccoli stir-fry': 'Salteado Wok de Carne y Brócoli',
+    'chili con carne': 'Chili con Carne y Frijoles Rústico',
+    'belgian meatballs in liège syrup sauce': 'Albóndigas Belgas en Salsa de Jarabe de Lieja',
+    'belgian stoemp': 'Puré Rústico Belga con Vegetales (Stoemp)',
+    'shepherd\'s pie': 'Pastel de Pastor con Puré de Papas Gratinado',
+    'cottage pie': 'Pastel Tradicional de Carne Picada y Papas',
+
+    // Aves (Chicken)
+    'chicken & mushroom hotpot': 'Cazuela de Pollo con Champiñones',
     'chicken marengo': 'Pollo Marengo con Tomates y Romero',
     'chicken fajitas': 'Fajitas de Pollo con Pimientos Asados',
     'teriyaki chicken casserole': 'Cazuela de Pollo Teriyaki con Sésamo',
-    'apple frangipan tart': 'Tarta Rústica de Manzana y Almendras',
+    'chicken couscous': 'Cuscús con Pollo y Verduras Especiadas',
+    'chicken enchilada casserole': 'Cazuela de Enchiladas de Pollo Gratinadas',
+    'chicken handi': 'Curry Cremoso de Pollo en Cazuela Handi',
+    'chicken parmigiana': 'Pechuga de Pollo a la Parmesana Gratinada',
+    'chicken alfredo': 'Fettuccine Alfredo con Tiras de Pollo',
+    'chicken tikka masala': 'Pollo Tikka Masala con Especias Aromáticas',
+    'butter chicken': 'Pollo a la Mantequilla con Salsa Cremosa de Tomate',
+    'brown stew chicken': 'Guiso Caribeño de Pollo con Especias',
+    'piri-piri chicken and slaw': 'Pollo Piri-Piri Especiado con Ensalada',
+    'tandoori chicken': 'Pollo Tandoori Marinado al Horno',
+
+    // Pescados y Mariscos (Fish & Seafood)
+    'pan-fried hake, white bean & chorizo broth': 'Merluza a la Plancha con Caldo de Porotos y Chorizo',
+    'baked salmon with fennel & tomatoes': 'Salmón Horneado con Hinojo y Tomates',
+    'bang bang prawn salad': 'Ensalada Bang Bang de Langostinos Crujientes',
+    'bangladeshi fish curry with daikon': 'Curry de Pescado con Rábano Daikon',
+    'barramundi with moroccan spices': 'Pescado Barramundi a las Especias Marroquíes',
+    'fish and chips': 'Pescado Rebozado Clásico con Papas Fritas',
+    'fish pie': 'Pastel Rústico de Pescado Gratinado',
+    'shrimp chow mein': 'Fideos Chow Mein Salteados con Camarones',
+    'paella': 'Paella Valenciana Tradicional de Mariscos',
+
+    // Postres y Dulces (Desserts & Baking)
+    'pancakes': 'Panqueques Dorados con Miel y Avena',
+    'banana pancakes': 'Panqueques de Plátano y Avena',
+    'beetroot pancakes': 'Panqueques Rústicos de Remolacha',
+    'apple frangipan tart': 'Tarta Rústica de Manzana y Frangipane',
     'apple & blackberry crumble': 'Crumble Artesanal de Manzana y Moras',
-    'pancakes': 'Panqueques Dorados de Avena y Miel',
+    'apple pie': 'Pastel Casero de Manzana Especiado',
     'chocolate gateau': 'Gâteau Artesanal de Chocolate Intenso',
+    'chocolate souffle': 'Soufflé Esponjoso de Chocolate Negro',
+    'passion fruit mousse': 'Mousse Refrescante de Maracuyá',
+    'peanut butter cheesecake': 'Tarta de Queso con Mantequilla de Maní',
+    'peanut butter cookies': 'Galletas Caseras de Mantequilla de Maní',
+    'pear tarte tatin': 'Tarta Tatin Caramelizada de Peras',
+    'pistachio cake': 'Bizcocho Esponjoso de Pistacho',
+    'pistachio kunafa chocolate cake and cupcakes': 'Tarta de Chocolate con Pistacho y Masa Kunafa',
+    'polish chocolate & walnut cake': 'Pastel Polaco de Chocolate y Nueces',
+    'bakewell tart': 'Tarta Británica Bakewell con Almendras',
+    'battenberg cake': 'Pastel Battenberg Ajedrezado de Almendra',
+    'baklava with spiced nuts, ricotta & chocolate': 'Baklava de Frutos Secos con Ricotta y Chocolate',
+    'bread and butter pudding': 'Pudín Británico de Pan y Mantequilla',
+    'blackberry fool': 'Copa Cremosa de Moras y Nata',
+    'parkin cake': 'Bizcocho Rústico de Jengibre y Miel (Parkin)',
+    'tiramisu': 'Tiramisú Clásico con Mascarpone y Café',
+
+    // Platos Típicos, Entradas y Vegetales
+    'pisto con huevos': 'Pisto Manchego Tradicional con Huevos',
+    'patatas bravas': 'Patatas Bravas Crujientes con Salsa Picante',
     'french onion soup': 'Sopa de Cebolla Gratinada a la Francesa',
     'ratatouille': 'Ratatouille Campestre con Vegetales de Estación',
     'guacamole': 'Guacamole Rústico con Cilantro y Lima',
+    'pa amb tomaquet (bread with tomato)': 'Pa amb Tomàquet (Pan Rústico con Tomate y Aceite)',
+    'papas chorreadas recipe (potatoes with cream and cheese sauce)': 'Papas Chorreadas con Crema y Queso',
+    'pastel de choclo': 'Pastel de Choclo Chileno Tradicional',
+    'pastel de papas (chilean potato pie)': 'Pastel de Papas Tradicional',
+    'pad thai': 'Fideos Pad Thai Salteados con Maní y Lima',
+    'pad see ew': 'Fideos de Arroz Tailandeses Salteados con Soja',
+    'padron peppers': 'Pimientos de Padrón Asados con Sal Marina',
+    'pan de yucca': 'Panecillos de Yuca y Queso Horneados',
+    'baked yuca fries': 'Papas de Yuca Horneadas y Crujientes',
+    'papaya salad': 'Ensalada Tailandesa Refrescante de Papaya',
+    'paracuca (roasted peanuts)': 'Maní Tostado Crocante (Paracuca)',
+    'paszteciki (polish pasties)': 'Pastelillos Polacos Rellenos al Horno',
+    'piernik (polish gingerbread)': 'Pan de Especias Polaco con Jengibre',
+    'pierogi (polish dumplings)': 'Pierogi Rellenos de Papa y Queso',
+    'plantain rolls': 'Rollitos Dorados de Plátano Macho',
+    'bean & sausage hotpot': 'Cazuela Rústica de Porotos con Salchicha',
+    'barbecue pork buns': 'Bollos al Vapor Rellenos de Cerdo Barbacoa',
+    'bbq pork sloppy joes': 'Sándwich Desmenuzado de Cerdo a la Barbacoa',
+    'beavertails': 'Masa Dulce Frita Canadiense con Canela y Azúcar',
+    'beetroot soup (borscht)': 'Sopa Tradicional de Remolacha (Borsch)',
+    'baba ghanoush': 'Berenjena Asada Ahumada (Baba Ghanoush)',
+    'baingan bharta': 'Puré Especiado de Berenjenas Asadas',
+    'bajan salt bread recipe': 'Panecillos Rústicos Salados de Barbados',
+    'bajan sweet bread': 'Pan Dulce Tradicional con Coco de Barbados',
+    'baked brie with sorrel jam': 'Queso Brie Horneado con Mermelada',
   };
 
-  static final Map<String, String> _titleWords = {
-    'salad': 'Ensalada',
-    'pasta': 'Pasta',
-    'soup': 'Sopa',
+  // Mapeo léxico de términos para construcción sintáctica española
+  static final Map<String, String> _coreTerms = {
+    // Tipos de preparación (Plato)
+    'cheesecake': 'Tarta de Queso',
+    'cake': 'Tarta',
     'pie': 'Pastel',
     'tart': 'Tarta',
-    'cake': 'Tarta',
+    'crumble': 'Crumble',
+    'pancakes': 'Panqueques',
+    'pancake': 'Panqueque',
+    'salad': 'Ensalada',
+    'soup': 'Sopa',
+    'stew': 'Estofado',
+    'casserole': 'Cazuela',
+    'hotpot': 'Cazuela',
+    'curry': 'Curry',
+    'risotto': 'Risotto',
+    'pasta': 'Pasta',
+    'pudding': 'Pudín',
+    'mousse': 'Mousse',
+    'burger': 'Hamburguesa',
+    'sandwich': 'Sándwich',
+    'roast': 'Asado',
+    'broth': 'Caldo',
+    'sauce': 'Salsa',
     'bread': 'Pan',
+    'cookies': 'Galletas',
+    'biscuits': 'Galletas',
+    'rolls': 'Rollitos',
+    'roll': 'Rollito',
+    'skewers': 'Brochetas',
+    'noodles': 'Fideos',
+    'meatballs': 'Albóndigas',
+    'dumplings': 'Empanadillas',
+    'stir-fry': 'Salteado Wok',
+    'enchiladas': 'Enchiladas',
+    'fajitas': 'Fajitas',
+    'buns': 'Bollos',
+
+    // Métodos de cocción y adjetivos
+    'baked': 'Horneado/a',
+    'pan-fried': 'a la Plancha',
+    'fried': 'Frito/a',
+    'roasted': 'Asado/a',
+    'grilled': 'a la Parrilla',
+    'steamed': 'al Vapor',
+    'slow-cooked': 'a Fuego Lento',
+    'braised': 'Braseado/a',
+    'crispy': 'Crocante',
+    'creamy': 'Cremoso/a',
+    'spicy': 'Picante',
+    'sweet': 'Dulce',
+
+    // Ingredientes principales
     'chicken': 'Pollo',
-    'beef': 'Carne',
+    'beef': 'Carne de Res',
     'pork': 'Cerdo',
     'fish': 'Pescado',
     'salmon': 'Salmón',
     'tuna': 'Atún',
-    'shrimp': 'Camarones',
+    'hake': 'Merluza',
+    'cod': 'Bacalao',
     'prawns': 'Langostinos',
-    'stew': 'Estofado',
-    'casserole': 'Cazuela',
-    'curry': 'Curry',
+    'shrimp': 'Camarones',
+    'lamb': 'Cordero',
+    'duck': 'Pato',
+    'turkey': 'Pavo',
+    'sausage': 'Salchicha',
+    'bacon': 'Panceta',
+    'chorizo': 'Chorizo',
+    'mushroom': 'Champiñones',
+    'mushrooms': 'Champiñones',
+    'tomato': 'Tomate',
+    'tomatoes': 'Tomates',
+    'potato': 'Papas',
+    'potatoes': 'Papas',
+    'sweet potato': 'Batata',
+    'yuca': 'Yuca',
+    'cheese': 'Queso',
+    'brie': 'Queso Brie',
+    'ricotta': 'Ricotta',
+    'spinach': 'Espinacas',
+    'garlic': 'Ajo',
+    'onion': 'Cebolla',
+    'onions': 'Cebollas',
+    'corn': 'Maíz',
+    'pumpkin': 'Calabaza',
+    'carrot': 'Zanahoria',
+    'carrots': 'Zanahorias',
+    'beetroot': 'Remolacha',
+    'broccoli': 'Brócoli',
+    'cabbage': 'Repollo',
+    'cauliflower': 'Coliflor',
+    'peas': 'Arvejas',
+    'beans': 'Porotos',
+    'white bean': 'Porotos Blancos',
+    'lentils': 'Lentejas',
     'rice': 'Arroz',
-    'roasted': 'Asado',
-    'roast': 'Asado',
-    'fried': 'Frito',
-    'grilled': 'a la Parrilla',
-    'baked': 'al Horno',
-    'creamy': 'Cremoso',
-    'spicy': 'Picante',
-    'sweet': 'Dulce',
-    'and': 'y',
-    'with': 'con',
-    'garlic': 'al Ajillo',
-    'lemon': 'al Limón',
-    'herb': 'a las Hierbas',
-    'mushroom': 'con Champiñones',
-    'mushrooms': 'con Champiñones',
-    'cheese': 'con Queso',
+    'couscous': 'Cuscús',
+    'vegetable': 'Vegetales',
+    'vegetables': 'Vegetales',
+    'apple': 'Manzana',
+    'banana': 'Plátano',
+    'blueberry': 'Arándanos',
+    'blackberry': 'Moras',
+    'strawberry': 'Frutillas',
+    'peach': 'Durazno',
+    'pear': 'Pera',
+    'passion fruit': 'Maracuyá',
+    'lemon': 'Limón',
+    'lime': 'Lima',
+    'orange': 'Naranja',
+    'chocolate': 'Chocolate',
+    'peanut butter': 'Mantequilla de Maní',
+    'pistachio': 'Pistacho',
+    'walnut': 'Nueces',
+    'almond': 'Almendras',
+    'vanilla': 'Vainilla',
+    'honey': 'Miel',
+    'ginger': 'Jengibre',
+    'mustard': 'Mostaza',
+    'pepper': 'Pimienta',
+    'fennel': 'Hinojo',
+    'papaya': 'Papaya',
   };
 
   static final Map<String, String> _ingredients = {
@@ -198,26 +388,126 @@ class CulinaryTranslator {
     'mediterranean': 'Mediterránea',
     'moroccan': 'Marroquí',
     'turkish': 'Turca',
+    'filipino': 'Filipina',
+    'canadian': 'Canadiense',
+    'polish': 'Polaca',
+    'jamaican': 'Jamaiquina',
+    'vietnamese': 'Vietnamita',
+    'dutch': 'Holandesa',
   };
 
   static String translateTitle(String rawTitle) {
-    final clean = rawTitle.trim();
+    var clean = rawTitle.trim();
+    if (clean.isEmpty) return 'Receta Artesanal';
+
     final lower = clean.toLowerCase();
 
+    // 1. Coincidencia exacta directa
     if (_exactTitles.containsKey(lower)) {
       return _exactTitles[lower]!;
     }
 
-    final words = clean.split(' ');
-    final translatedWords = words.map((w) {
-      final wLower = w.toLowerCase().replaceAll(RegExp(r'[^a-z]'), '');
-      if (_titleWords.containsKey(wLower)) {
-        return _titleWords[wLower]!;
-      }
-      return w;
-    }).toList();
+    // 2. Limpieza de aclaraciones entre paréntesis ya redundantes
+    clean = clean.replaceAll(RegExp(r'\s*\([^)]*\)\s*$'), '').trim();
+    final lowerClean = clean.toLowerCase();
+    if (_exactTitles.containsKey(lowerClean)) {
+      return _exactTitles[lowerClean]!;
+    }
 
-    return translatedWords.join(' ');
+    // 3. Reglas de sintaxis culinaria: Detectar "DishType" al final
+    // En inglés: [Ingrediente/Modificador] + [Tipo de Plato]
+    // En español: [Tipo de Plato] de/con [Ingrediente/Modificador]
+    for (final dishEntry in [
+      MapEntry('cheesecake', 'Tarta de Queso con '),
+      MapEntry('cake', 'Tarta de '),
+      MapEntry('pie', 'Pastel de '),
+      MapEntry('tart', 'Tarta de '),
+      MapEntry('crumble', 'Crumble de '),
+      MapEntry('pancakes', 'Panqueques de '),
+      MapEntry('pancake', 'Panqueque de '),
+      MapEntry('salad', 'Ensalada de '),
+      MapEntry('soup', 'Sopa de '),
+      MapEntry('stew', 'Estofado de '),
+      MapEntry('casserole', 'Cazuela de '),
+      MapEntry('hotpot', 'Cazuela de '),
+      MapEntry('curry', 'Curry de '),
+      MapEntry('broth', 'Caldo de '),
+      MapEntry('pudding', 'Pudín de '),
+      MapEntry('mousse', 'Mousse de '),
+      MapEntry('burger', 'Hamburguesa de '),
+      MapEntry('sandwich', 'Sándwich de '),
+      MapEntry('stir-fry', 'Salteado de '),
+      MapEntry('cookies', 'Galletas de '),
+      MapEntry('biscuits', 'Galletas de '),
+      MapEntry('rolls', 'Rollitos de '),
+    ]) {
+      final dishKeyword = dishEntry.key;
+      final dishPrefixSpanish = dishEntry.value;
+
+      if (lowerClean.endsWith(' $dishKeyword')) {
+        final modifier = clean.substring(0, clean.length - dishKeyword.length - 1).trim();
+        final translatedModifier = _translateWords(modifier);
+        return '$dishPrefixSpanish$translatedModifier';
+      }
+    }
+
+    // 4. Regla: "[Cooking] [MainIngredient] with [Side]"
+    // Ej: "Baked salmon with fennel & tomatoes" -> "Salmón Horneado con Hinojo y Tomates"
+    final withMatch = RegExp(r'^(baked|roasted|grilled|pan-fried|fried)\s+(.+?)\s+with\s+(.+)$', caseSensitive: false)
+        .firstMatch(clean);
+    if (withMatch != null) {
+      final method = _coreTerms[withMatch.group(1)!.toLowerCase()] ?? withMatch.group(1)!;
+      final main = _translateWords(withMatch.group(2)!);
+      final side = _translateWords(withMatch.group(3)!.replaceAll('&', 'y'));
+      return '$main $method con $side';
+    }
+
+    // 5. Traducción sistemática de palabras con conectores en español
+    return _translateWords(clean);
+  }
+
+  static String _translateWords(String text) {
+    final tokens = text.split(RegExp(r'\s+'));
+    final result = <String>[];
+
+    for (var i = 0; i < tokens.length; i++) {
+      final rawToken = tokens[i];
+      final cleanToken = rawToken.replaceAll(RegExp(r'[^a-zA-ZáéíóúÁÉÍÓÚñÑ-]'), '');
+      final lower = cleanToken.toLowerCase();
+
+      // Chequear pares de dos palabras (ej. "peanut butter", "white bean", "passion fruit")
+      if (i < tokens.length - 1) {
+        final nextRaw = tokens[i + 1];
+        final nextClean = nextRaw.replaceAll(RegExp(r'[^a-zA-ZáéíóúÁÉÍÓÚñÑ-]'), '');
+        final bigram = '$lower ${nextClean.toLowerCase()}';
+        if (_coreTerms.containsKey(bigram)) {
+          result.add(_coreTerms[bigram]!);
+          i++; // consumir siguiente palabra
+          continue;
+        }
+      }
+
+      if (_coreTerms.containsKey(lower)) {
+        result.add(_coreTerms[lower]!);
+      } else if (lower == 'and' || lower == '&') {
+        result.add('y');
+      } else if (lower == 'with') {
+        result.add('con');
+      } else if (lower == 'in') {
+        result.add('en');
+      } else if (lower == 'style') {
+        result.add('al estilo');
+      } else {
+        result.add(rawToken);
+      }
+    }
+
+    var assembled = result.join(' ');
+    // Ajustar mayúscula inicial
+    if (assembled.isNotEmpty) {
+      assembled = assembled[0].toUpperCase() + assembled.substring(1);
+    }
+    return assembled;
   }
 
   static String translateArea(String rawArea) {
@@ -273,18 +563,24 @@ class CulinaryTranslator {
     var s = step.trim();
     if (s.isEmpty) return s;
 
-    // Reemplazos de frases completas de cocina
     final replacements = [
       ['Bring a large saucepan of salted water to the boil', 'Pon a hervir abundante agua con sal en una olla grande'],
+      ['Bring a large pot of salted water to the boil', 'Pon a hervir abundante agua con sal en una olla grande'],
+      ['Bring to the boil', 'Lleva a ebullición'],
       ['Preheat the oven to', 'Precalienta el horno a'],
       ['Heat the olive oil in a large pan', 'Calienta el aceite de oliva en una sartén amplia'],
+      ['Heat the olive oil in a pan', 'Calienta el aceite de oliva en una sartén'],
+      ['Heat the oil in a large pan', 'Calienta el aceite en una sartén amplia'],
       ['Heat the oil in a pan', 'Calienta el aceite en una sartén'],
       ['Heat the butter in a pan', 'Derrite la mantequilla en una sartén a fuego medio'],
       ['Season with salt and pepper', 'Sazona al gusto con sal y pimienta negra'],
+      ['Season with salt', 'Sazona con sal al gusto'],
       ['Sprinkle with black pepper', 'Espolvorea con pimienta negra recién molida'],
       ['Cook for about', 'Cocina durante aproximadamente'],
       ['Cook for', 'Cocina durante'],
+      ['Bake for about', 'Hornea durante aproximadamente'],
       ['Bake for', 'Hornea durante'],
+      ['Simmer for about', 'Cocina a fuego lento durante aproximadamente'],
       ['Simmer for', 'Cocina a fuego lento durante'],
       ['Stir well', 'Revuelve bien todos los ingredientes'],
       ['Stir occasionally', 'Revuelve de forma ocasional'],
@@ -294,13 +590,19 @@ class CulinaryTranslator {
       ['Add the pasta', 'Añade la pasta'],
       ['Add the garlic', 'Incorpora los dientes de ajo picados'],
       ['Add the onions', 'Agrega la cebolla picada'],
-      ['Add the tomatoes', 'Incorpora los tomates'],
+      ['Add the onion', 'Agrega la cebolla picada'],
+      ['Add the tomatoes', 'Incorpora los tomates maduros'],
+      ['Add the chicken', 'Incorpora el pollo'],
+      ['Add the beef', 'Agrega la carne'],
       ['Slice the', 'Corta en rodajas el/la'],
       ['Chop the', 'Pica finamente el/la'],
+      ['Finely chop the', 'Pica muy fino el/la'],
       ['Wash the', 'Lava con cuidado el/la'],
       ['Mix well', 'Mezcla homogéneamente'],
+      ['Mix together', 'Mezcla todo homogéneamente'],
       ['Serve hot', 'Sirve caliente de inmediato'],
       ['Serve immediately', 'Sirve de inmediato en platos hondos'],
+      ['Serve with', 'Acompaña y sirve con'],
       ['just before serving', 'justo antes de servir'],
       ['minutes', 'minutos'],
       ['minute', 'minuto'],
@@ -312,7 +614,6 @@ class CulinaryTranslator {
       s = s.replaceAll(RegExp(pair[0], caseSensitive: false), pair[1]);
     }
 
-    // Capitalizar primera letra
     if (s.isNotEmpty) {
       s = s[0].toUpperCase() + s.substring(1);
     }
@@ -320,4 +621,3 @@ class CulinaryTranslator {
     return s;
   }
 }
-

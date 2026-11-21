@@ -2,10 +2,20 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'dart:convert';
+import 'package:culina/data/services/culinary_translator.dart';
 import 'package:culina/data/services/recipe_api_service.dart';
 
 void main() {
   group('TheMealDB API Service Tests', () {
+    test('CulinaryTranslator translates dynamic complex English titles to Spanish', () {
+      expect(CulinaryTranslator.translateTitle('Peanut Butter Cheesecake'), 'Tarta de Queso con Mantequilla de Maní');
+      expect(CulinaryTranslator.translateTitle('Passion fruit mousse'), 'Mousse Refrescante de Maracuyá');
+      expect(CulinaryTranslator.translateTitle('Pistachio cake'), 'Bizcocho Esponjoso de Pistacho');
+      expect(CulinaryTranslator.translateTitle('Banana Pancakes'), 'Panqueques de Plátano y Avena');
+      expect(CulinaryTranslator.translateTitle('Baked salmon with fennel & tomatoes'), 'Salmón Horneado con Hinojo y Tomates');
+      expect(CulinaryTranslator.translateTitle('Beef Wellington'), 'Solomillo de Res Wellington en Hojaldre');
+    });
+
     test('RecipeApiService translates TheMealDB response into Spanish RecipeModel', () async {
       final mockJson = jsonEncode({
         'meals': [
