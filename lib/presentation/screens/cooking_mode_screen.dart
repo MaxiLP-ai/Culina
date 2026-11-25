@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import '../../data/services/culinary_translator.dart';
 import '../../domain/entities/recipe.dart';
 import '../providers/theme_provider.dart';
 import '../theme/app_theme.dart';
@@ -131,6 +132,23 @@ class _CookingModeScreenState extends State<CookingModeScreen> {
     return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
   }
 
+  String _formatUnitForAmount(String amount, String unit) {
+    if (amount == '1') {
+      final lower = unit.trim().toLowerCase();
+      if (lower == 'unidades') return 'unidad';
+      if (lower == 'dientes') return 'diente';
+      if (lower == 'cucharadas') return 'cucharada';
+      if (lower == 'cucharaditas') return 'cucharadita';
+      if (lower == 'tazas') return 'taza';
+      if (lower == 'rebanadas') return 'rebanada';
+      if (lower == 'piezas') return 'pieza';
+      if (lower == 'ramitas') return 'ramita';
+      if (lower == 'hojas') return 'hoja';
+      if (lower == 'puñados') return 'puñado';
+    }
+    return unit;
+  }
+
   void _showIngredientsSheet() {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final cardBg = isDark ? AppColors.cardDark : Colors.white;
@@ -192,6 +210,9 @@ class _CookingModeScreenState extends State<CookingModeScreen> {
                     itemBuilder: (context, index) {
                       final item = widget.recipe.ingredients[index];
                       final amount = item.formatAmountForServings(widget.recipe.servings, widget.servings);
+                      final displayName = CulinaryTranslator.translateIngredientName(item.name);
+                      final unitLabel = _formatUnitForAmount(amount, item.unit);
+
                       return Padding(
                         padding: const EdgeInsets.symmetric(vertical: 8),
                         child: Row(
@@ -199,7 +220,7 @@ class _CookingModeScreenState extends State<CookingModeScreen> {
                           children: [
                             Expanded(
                               child: Text(
-                                item.name,
+                                displayName,
                                 style: GoogleFonts.plusJakartaSans(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w500,
@@ -214,7 +235,7 @@ class _CookingModeScreenState extends State<CookingModeScreen> {
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Text(
-                                '$amount ${item.unit}',
+                                '$amount $unitLabel'.trim(),
                                 style: GoogleFonts.plusJakartaSans(
                                   fontSize: 13,
                                   fontWeight: FontWeight.w700,
@@ -304,7 +325,9 @@ class _CookingModeScreenState extends State<CookingModeScreen> {
     final steps = widget.recipe.steps;
     final totalSteps = steps.isNotEmpty ? steps.length : 1;
     final progress = (totalSteps > 0) ? (_currentStepIndex + 1) / totalSteps : 1.0;
-    final currentInstruction = steps.isNotEmpty ? steps[_currentStepIndex] : 'Preparar los ingredientes y servir al gusto.';
+    final currentInstruction = steps.isNotEmpty
+        ? CulinaryTranslator.translateInstructionStep(steps[_currentStepIndex])
+        : 'Preparar los ingredientes y servir al gusto.';
 
     final bgColor = isDark ? AppColors.backgroundDark : AppColors.background;
     final cardBg = isDark ? AppColors.cardDark : Colors.white;

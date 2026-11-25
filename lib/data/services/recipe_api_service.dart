@@ -203,14 +203,15 @@ class RecipeApiService {
 
     // Extracción y traducción de pasos de preparación
     final instructions = item['strInstructions'] as String? ?? '';
-    final rawSteps = instructions
-        .split(RegExp(r'\r?\n'))
+    final rawLines = instructions
+        .split(RegExp(r'\r?\n+'))
         .map((s) => s.trim())
-        .where((s) => s.isNotEmpty && s.length > 5 && !RegExp(r'^(step\s*\d+|paso\s*\d+)', caseSensitive: false).hasMatch(s))
+        .map((s) => s.replaceAll(RegExp(r'^(step\s*\d+[:.-]?\s*|paso\s*\d+[:.-]?\s*)', caseSensitive: false), '').trim())
+        .where((s) => s.isNotEmpty && s.length > 5)
         .toList();
 
-    final translatedSteps = rawSteps.isNotEmpty
-        ? rawSteps.map((s) => CulinaryTranslator.translateInstructionStep(s)).toList()
+    final translatedSteps = rawLines.isNotEmpty
+        ? rawLines.map((s) => CulinaryTranslator.translateInstructionStep(s)).toList()
         : [
             instructions.isNotEmpty
                 ? CulinaryTranslator.translateInstructionStep(instructions)

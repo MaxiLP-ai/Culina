@@ -1,6 +1,7 @@
 import '../../domain/entities/recipe.dart';
 import '../../domain/repositories/recipe_repository.dart';
 import '../models/recipe_model.dart';
+import '../services/culinary_translator.dart';
 import '../services/recipe_api_service.dart';
 import '../services/recipe_local_service.dart';
 
@@ -13,9 +14,24 @@ class RecipeRepositoryImpl implements RecipeRepository {
     this.apiService,
   });
 
+  Recipe _sanitizeRecipe(Recipe r) {
+    if (r.isUserCreated) return r;
+    return r.copyWith(
+      title: CulinaryTranslator.translateTitle(r.title),
+      ingredients: r.ingredients.map((ing) {
+        return ing.copyWith(
+          name: CulinaryTranslator.translateIngredientName(ing.name),
+          unit: CulinaryTranslator.translateUnit(ing.unit),
+        );
+      }).toList(),
+      steps: r.steps.map((s) => CulinaryTranslator.translateInstructionStep(s)).toList(),
+    );
+  }
+
   @override
   Future<List<Recipe>> getAllRecipes() async {
-    final localList = await localService.loadRecipes();
+    final rawLocalList = await localService.loadRecipes();
+    final localList = rawLocalList.map(_sanitizeRecipe).toList();
     final userCreated = localList.where((r) => r.isUserCreated).toList();
     final favoriteIds = localList.where((r) => r.isFavorite).map((r) => r.id).toSet();
 
@@ -24,10 +40,11 @@ class RecipeRepositoryImpl implements RecipeRepository {
       final remoteList = await apiService!.fetchRecipes();
       if (remoteList != null && remoteList.isNotEmpty) {
         final adjustedRemote = remoteList.map((r) {
-          if (favoriteIds.contains(r.id)) {
-            return r.copyWith(isFavorite: true);
+          final sanitized = _sanitizeRecipe(r);
+          if (favoriteIds.contains(sanitized.id)) {
+            return sanitized.copyWith(isFavorite: true);
           }
-          return r;
+          return sanitized;
         }).toList();
 
         // Mantenemos al inicio las recetas creadas por el usuario y luego las de la API
@@ -44,12 +61,12 @@ class RecipeRepositoryImpl implements RecipeRepository {
   Future<Recipe?> getRecipeById(String id) async {
     final list = await localService.loadRecipes();
     for (final r in list) {
-      if (r.id == id) return r;
+      if (r.id == id) return _sanitizeRecipe(r);
     }
 
     if (apiService != null) {
       final remoteRecipe = await apiService!.fetchRecipeById(id);
-      if (remoteRecipe != null) return remoteRecipe;
+      if (remoteRecipe != null) return _sanitizeRecipe(remoteRecipe);
     }
 
     return null;

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import '../../data/services/culinary_translator.dart';
 import '../../domain/entities/recipe.dart';
 import '../providers/recipe_provider.dart';
 import '../theme/app_theme.dart';
@@ -32,6 +33,23 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
     _checkedIngredients = List.filled(widget.recipe.ingredients.length, false);
   }
 
+  String _formatUnitForAmount(String amount, String unit) {
+    if (amount == '1') {
+      final lower = unit.trim().toLowerCase();
+      if (lower == 'unidades') return 'unidad';
+      if (lower == 'dientes') return 'diente';
+      if (lower == 'cucharadas') return 'cucharada';
+      if (lower == 'cucharaditas') return 'cucharadita';
+      if (lower == 'tazas') return 'taza';
+      if (lower == 'rebanadas') return 'rebanada';
+      if (lower == 'piezas') return 'pieza';
+      if (lower == 'ramitas') return 'ramita';
+      if (lower == 'hojas') return 'hoja';
+      if (lower == 'puñados') return 'puñado';
+    }
+    return unit;
+  }
+
   void _shareRecipe(Recipe recipe) {
     HapticFeedback.lightImpact();
     final buffer = StringBuffer();
@@ -42,11 +60,14 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
     buffer.writeln('🛒 Ingredientes:');
     for (final ing in recipe.ingredients) {
       final amount = ing.formatAmountForServings(recipe.servings, _currentServings);
-      buffer.writeln(' • ${ing.name}: $amount ${ing.unit}');
+      final translatedName = CulinaryTranslator.translateIngredientName(ing.name);
+      final unitLabel = _formatUnitForAmount(amount, ing.unit);
+      buffer.writeln(' • $translatedName: $amount $unitLabel'.trim());
     }
     buffer.writeln('\n👨‍🍳 Pasos de preparación:');
     for (var i = 0; i < recipe.steps.length; i++) {
-      buffer.writeln(' ${i + 1}. ${recipe.steps[i]}');
+      final step = CulinaryTranslator.translateInstructionStep(recipe.steps[i]);
+      buffer.writeln(' ${i + 1}. $step');
     }
     buffer.writeln('\n— Compartido desde Culina');
 
@@ -494,6 +515,8 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                         currentRecipe.servings,
                         _currentServings,
                       );
+                      final displayName = CulinaryTranslator.translateIngredientName(ingredient.name);
+                      final unitLabel = _formatUnitForAmount(scaledAmount, ingredient.unit);
 
                       return GestureDetector(
                         onTap: () {
@@ -530,7 +553,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                               const SizedBox(width: 12),
                               Expanded(
                                 child: Text(
-                                  ingredient.name,
+                                  displayName,
                                   style: GoogleFonts.plusJakartaSans(
                                     fontSize: 13.5,
                                     color: isChecked ? textMutedColor : textColor,
@@ -546,7 +569,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: Text(
-                                  '$scaledAmount ${ingredient.unit}'.trim(),
+                                  '$scaledAmount $unitLabel'.trim(),
                                   style: GoogleFonts.plusJakartaSans(
                                     fontSize: 12,
                                     fontWeight: FontWeight.w700,
@@ -588,6 +611,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                     ...currentRecipe.steps.asMap().entries.map((entry) {
                       final stepNum = entry.key + 1;
                       final instruction = entry.value;
+                      final displayInstruction = CulinaryTranslator.translateInstructionStep(instruction);
 
                       return Padding(
                         padding: const EdgeInsets.only(bottom: 16),
@@ -615,7 +639,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                             const SizedBox(width: 14),
                             Expanded(
                               child: Text(
-                                instruction,
+                                displayInstruction,
                                 style: GoogleFonts.plusJakartaSans(
                                   fontSize: 13.5,
                                   height: 1.5,
