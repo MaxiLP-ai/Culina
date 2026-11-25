@@ -28,11 +28,12 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
   @override
   void initState() {
     super.initState();
-    _currentServings = widget.recipe.servings > 0 ? widget.recipe.servings : 2;
+    _currentServings = widget.recipe.servings > 0 ? widget.recipe.servings : 4;
     _checkedIngredients = List.filled(widget.recipe.ingredients.length, false);
   }
 
   void _shareRecipe(Recipe recipe) {
+    HapticFeedback.lightImpact();
     final buffer = StringBuffer();
     buffer.writeln('🍽️ ${recipe.title}');
     if (recipe.subtitle.isNotEmpty) buffer.writeln('${recipe.subtitle}\n');
@@ -61,15 +62,22 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final recipeProvider = context.watch<RecipeProvider>();
-    // Safe lookup avoiding generic variance casting exceptions
     final currentRecipe = recipeProvider.getRecipeById(
       widget.recipe.id,
       fallback: widget.recipe,
     );
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cardBg = isDark ? AppColors.cardDark : Colors.white;
+    final borderColor = isDark ? AppColors.borderDark : AppColors.border;
+    final textColor = isDark ? AppColors.textPrimaryDark : AppColors.textPrimary;
+    final textMutedColor = isDark ? AppColors.textSecondaryDark : AppColors.textSecondary;
+
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: isDark ? AppColors.backgroundDark : AppColors.background,
       appBar: AppBar(
+        backgroundColor: isDark ? AppColors.backgroundDark : AppColors.background,
+        elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_rounded),
           onPressed: () => Navigator.of(context).pop(),
@@ -79,23 +87,25 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
           style: GoogleFonts.playfairDisplay(
             fontSize: 18,
             fontWeight: FontWeight.w700,
-            color: AppColors.textPrimary,
+            color: textColor,
           ),
         ),
         actions: [
           IconButton(
             icon: const Icon(Icons.share_outlined, size: 20),
-            color: AppColors.textPrimary,
+            color: textColor,
             tooltip: 'Compartir receta',
             onPressed: () => _shareRecipe(currentRecipe),
           ),
           IconButton(
             icon: Icon(
               currentRecipe.isFavorite ? Icons.bookmark_rounded : Icons.bookmark_border_rounded,
-              color: currentRecipe.isFavorite ? AppColors.orangeAccent : AppColors.textPrimary,
+              color: currentRecipe.isFavorite ? AppColors.orangeAccent : textColor,
               size: 22,
             ),
+            tooltip: 'Guardar receta',
             onPressed: () {
+              HapticFeedback.lightImpact();
               recipeProvider.toggleFavorite(currentRecipe.id);
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
@@ -117,14 +127,15 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Ilustración principal de la receta
               Container(
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: cardBg,
                   borderRadius: BorderRadius.circular(24),
-                  border: Border.all(color: AppColors.border),
+                  border: Border.all(color: borderColor),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.03),
+                      color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.03),
                       blurRadius: 10,
                       offset: const Offset(0, 3),
                     ),
@@ -135,7 +146,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                   child: Stack(
                     children: [
                       Container(
-                        color: const Color(0xFFF7F5EE),
+                        color: isDark ? const Color(0xFF282522) : const Color(0xFFF7F5EE),
                         padding: const EdgeInsets.symmetric(vertical: 24),
                         child: CulinaFoodGraphic(
                           icon: currentRecipe.icon,
@@ -150,15 +161,15 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                         child: Container(
                           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                           decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.9),
+                            color: (isDark ? Colors.black : Colors.white).withValues(alpha: 0.9),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Text(
                             currentRecipe.category,
                             style: GoogleFonts.plusJakartaSans(
                               fontSize: 11,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.textSecondary,
+                              fontWeight: FontWeight.w700,
+                              color: textColor,
                             ),
                           ),
                         ),
@@ -186,12 +197,13 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
               ),
               const SizedBox(height: 18),
 
+              // Título y subtítulo
               Text(
                 currentRecipe.title,
                 style: GoogleFonts.playfairDisplay(
                   fontSize: 24,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary,
+                  color: textColor,
                   height: 1.25,
                 ),
               ),
@@ -202,14 +214,16 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 13,
                     fontStyle: FontStyle.italic,
-                    color: AppColors.textSecondary,
+                    color: textMutedColor,
                   ),
                 ),
               ],
-              const SizedBox(height: 8),
+              const SizedBox(height: 10),
 
               Row(
                 children: [
+                  Icon(Icons.person_outline_rounded, size: 15, color: textMutedColor),
+                  const SizedBox(width: 4),
                   Flexible(
                     child: Text(
                       'Por ${currentRecipe.author}',
@@ -218,52 +232,80 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
-                        color: AppColors.textSecondary,
+                        color: textMutedColor,
                       ),
                     ),
                   ),
                   const SizedBox(width: 8),
                   const Text('·', style: TextStyle(color: AppColors.textMuted)),
                   const SizedBox(width: 8),
-                  Text(
-                    currentRecipe.difficulty,
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w500,
-                      color: AppColors.textSecondary,
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: isDark ? const Color(0xFF282522) : const Color(0xFFF3EFEA),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      currentRecipe.difficulty,
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                        color: textColor,
+                      ),
                     ),
                   ),
                 ],
               ),
               const SizedBox(height: 16),
 
+              // Barra de Tiempos Clara con Iconos
               Container(
                 padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: cardBg,
                   borderRadius: BorderRadius.circular(18),
-                  border: Border.all(color: AppColors.border),
+                  border: Border.all(color: borderColor),
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    _buildTimeMetric('PREP', '${currentRecipe.prepTime} min'),
-                    Container(height: 28, width: 1, color: AppColors.borderLight),
-                    _buildTimeMetric('COCCIÓN', '${currentRecipe.cookTime} min'),
-                    Container(height: 28, width: 1, color: AppColors.borderLight),
-                    _buildTimeMetric('TOTAL', '${currentRecipe.totalTime} min'),
+                    _buildTimeMetric(
+                      icon: Icons.hourglass_top_rounded,
+                      label: 'PREPARACIÓN',
+                      value: '${currentRecipe.prepTime} min',
+                      textColor: textColor,
+                      mutedColor: textMutedColor,
+                    ),
+                    Container(height: 28, width: 1, color: borderColor),
+                    _buildTimeMetric(
+                      icon: Icons.local_fire_department_rounded,
+                      label: 'COCCIÓN',
+                      value: '${currentRecipe.cookTime} min',
+                      textColor: textColor,
+                      mutedColor: textMutedColor,
+                    ),
+                    Container(height: 28, width: 1, color: borderColor),
+                    _buildTimeMetric(
+                      icon: Icons.timer_outlined,
+                      label: 'TIEMPO TOTAL',
+                      value: '${currentRecipe.totalTime} min',
+                      textColor: isDark ? const Color(0xFFDDA743) : AppColors.orangeAccent,
+                      mutedColor: textMutedColor,
+                    ),
                   ],
                 ),
               ),
               const SizedBox(height: 14),
 
-              // Porciones calculadas Stepper Card - fully responsive and overflow-proof
+              // Calculadora de Porciones en Vivo (Super Intuitiva)
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFFFBEB),
+                  color: isDark ? const Color(0xFF332A15) : const Color(0xFFFFFBEB),
                   borderRadius: BorderRadius.circular(18),
-                  border: Border.all(color: const Color(0xFFFDE68A)),
+                  border: Border.all(
+                    color: isDark ? const Color(0xFF785E28) : const Color(0xFFFDE68A),
+                  ),
                 ),
                 child: Row(
                   children: [
@@ -271,24 +313,31 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            'Porciones calculadas',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w700,
-                              color: const Color(0xFF92400E),
-                            ),
+                          Row(
+                            children: [
+                              const Text('🍽️ ', style: TextStyle(fontSize: 13)),
+                              Flexible(
+                                child: Text(
+                                  'Calculadora de Porciones',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w700,
+                                    color: isDark ? const Color(0xFFFDE68A) : const Color(0xFF92400E),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            'Ajusta los ingredientes al instante',
+                            'Ajusta con + o - para recalcular ingredientes',
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: GoogleFonts.plusJakartaSans(
                               fontSize: 11,
-                              color: const Color(0xFFB45309),
+                              color: isDark ? const Color(0xFFE5D5A5) : const Color(0xFFB45309),
                             ),
                           ),
                         ],
@@ -296,43 +345,51 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                     ),
                     const SizedBox(width: 10),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 2),
+                      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: isDark ? AppColors.cardDark : Colors.white,
                         borderRadius: BorderRadius.circular(14),
-                        border: Border.all(color: const Color(0xFFFDE68A)),
+                        border: Border.all(
+                          color: isDark ? const Color(0xFF785E28) : const Color(0xFFFDE68A),
+                        ),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           IconButton(
-                            icon: const Icon(Icons.remove, size: 16),
+                            icon: const Icon(Icons.remove_rounded, size: 18),
                             visualDensity: VisualDensity.compact,
                             padding: EdgeInsets.zero,
                             constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
-                            color: _currentServings > 1 ? AppColors.textPrimary : AppColors.textMuted,
+                            color: _currentServings > 1 ? textColor : textMutedColor,
                             onPressed: _currentServings > 1
-                                ? () => setState(() => _currentServings--)
+                                ? () {
+                                    HapticFeedback.selectionClick();
+                                    setState(() => _currentServings--);
+                                  }
                                 : null,
                           ),
                           Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 4),
+                            padding: const EdgeInsets.symmetric(horizontal: 6),
                             child: Text(
                               '$_currentServings',
                               style: GoogleFonts.plusJakartaSans(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w700,
-                                color: AppColors.textPrimary,
+                                fontSize: 15,
+                                fontWeight: FontWeight.w800,
+                                color: textColor,
                               ),
                             ),
                           ),
                           IconButton(
-                            icon: const Icon(Icons.add, size: 16),
+                            icon: const Icon(Icons.add_rounded, size: 18),
                             visualDensity: VisualDensity.compact,
                             padding: EdgeInsets.zero,
                             constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
-                            color: AppColors.textPrimary,
-                            onPressed: () => setState(() => _currentServings++),
+                            color: textColor,
+                            onPressed: () {
+                              HapticFeedback.selectionClick();
+                              setState(() => _currentServings++);
+                            },
                           ),
                         ],
                       ),
@@ -342,23 +399,24 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
               ),
               const SizedBox(height: 16),
 
+              // Descripción sobre este plato
               Container(
                 padding: const EdgeInsets.all(18),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: cardBg,
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: AppColors.border),
+                  border: Border.all(color: borderColor),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'SOBRE ESTE PLATO',
+                      'SOBRE ESTA PREPARACIÓN',
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 11,
                         fontWeight: FontWeight.w700,
                         letterSpacing: 1.1,
-                        color: AppColors.textMuted,
+                        color: isDark ? const Color(0xFFDDA743) : AppColors.textMuted,
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -367,7 +425,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 13,
                         height: 1.5,
-                        color: AppColors.textPrimary,
+                        color: textColor,
                       ),
                     ),
                   ],
@@ -375,12 +433,13 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
               ),
               const SizedBox(height: 16),
 
+              // Checklist Interactivo de Ingredientes
               Container(
                 padding: const EdgeInsets.all(18),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: cardBg,
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: AppColors.border),
+                  border: Border.all(color: borderColor),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -389,25 +448,41 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          'INGREDIENTES',
+                          'LISTA DE INGREDIENTES',
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: 11,
                             fontWeight: FontWeight.w700,
                             letterSpacing: 1.1,
-                            color: AppColors.textMuted,
+                            color: isDark ? const Color(0xFFDDA743) : AppColors.textMuted,
                           ),
                         ),
-                        Text(
-                          'Para $_currentServings ${_currentServings == 1 ? 'porción' : 'porciones'}',
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.textSecondary,
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: isDark ? const Color(0xFF282522) : const Color(0xFFF3EFEA),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            'Para $_currentServings ${_currentServings == 1 ? "porción" : "porciones"}',
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
+                              color: textColor,
+                            ),
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Toca un ingrediente para marcarlo mientras preparas la mesada',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 11,
+                        color: textMutedColor,
+                      ),
+                    ),
+                    const SizedBox(height: 14),
+
                     ...currentRecipe.ingredients.asMap().entries.map((entry) {
                       final index = entry.key;
                       final ingredient = entry.value;
@@ -422,6 +497,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
 
                       return GestureDetector(
                         onTap: () {
+                          HapticFeedback.selectionClick();
                           setState(() {
                             if (index < _checkedIngredients.length) {
                               _checkedIngredients[index] = !_checkedIngredients[index];
@@ -429,44 +505,53 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                           });
                         },
                         behavior: HitTestBehavior.opaque,
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 7),
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 150),
+                          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+                          margin: const EdgeInsets.only(bottom: 6),
+                          decoration: BoxDecoration(
+                            color: isChecked
+                                ? (isDark ? const Color(0xFF1E2822) : const Color(0xFFF4F9F5))
+                                : Colors.transparent,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              Container(
-                                width: 20,
-                                height: 20,
-                                decoration: BoxDecoration(
-                                  color: isChecked ? AppColors.darkButton : Colors.transparent,
-                                  borderRadius: BorderRadius.circular(6),
-                                  border: Border.all(
-                                    color: isChecked ? AppColors.darkButton : AppColors.border,
-                                    width: 1.5,
-                                  ),
-                                ),
-                                child: isChecked
-                                    ? const Icon(Icons.check, size: 14, color: Colors.white)
-                                    : null,
+                              Icon(
+                                isChecked
+                                    ? Icons.check_circle_rounded
+                                    : Icons.radio_button_unchecked_rounded,
+                                size: 20,
+                                color: isChecked
+                                    ? const Color(0xFF059669)
+                                    : (isDark ? Colors.white38 : AppColors.textMuted),
                               ),
                               const SizedBox(width: 12),
                               Expanded(
                                 child: Text(
                                   ingredient.name,
                                   style: GoogleFonts.plusJakartaSans(
-                                    fontSize: 13,
-                                    color: isChecked ? AppColors.textMuted : AppColors.textPrimary,
+                                    fontSize: 13.5,
+                                    color: isChecked ? textMutedColor : textColor,
                                     decoration: isChecked ? TextDecoration.lineThrough : null,
                                   ),
                                 ),
                               ),
                               const SizedBox(width: 8),
-                              Text(
-                                '$scaledAmount ${ingredient.unit}'.trim(),
-                                style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                  color: isChecked ? AppColors.textMuted : AppColors.textSecondary,
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                decoration: BoxDecoration(
+                                  color: isDark ? const Color(0xFF282522) : const Color(0xFFF3EFEA),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Text(
+                                  '$scaledAmount ${ingredient.unit}'.trim(),
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w700,
+                                    color: isChecked ? textMutedColor : textColor,
+                                  ),
                                 ),
                               ),
                             ],
@@ -479,23 +564,24 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
               ),
               const SizedBox(height: 16),
 
+              // Pasos de Preparación Numerados
               Container(
                 padding: const EdgeInsets.all(18),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: cardBg,
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: AppColors.border),
+                  border: Border.all(color: borderColor),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'PREPARACIÓN PASO A PASO',
+                      'PASOS DE PREPARACIÓN',
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 11,
                         fontWeight: FontWeight.w700,
                         letterSpacing: 1.1,
-                        color: AppColors.textMuted,
+                        color: isDark ? const Color(0xFFDDA743) : AppColors.textMuted,
                       ),
                     ),
                     const SizedBox(height: 14),
@@ -504,36 +590,36 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                       final instruction = entry.value;
 
                       return Padding(
-                        padding: const EdgeInsets.only(bottom: 14),
+                        padding: const EdgeInsets.only(bottom: 16),
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Container(
-                              width: 26,
-                              height: 26,
-                              decoration: const BoxDecoration(
-                                color: Color(0xFFF3EFE9),
+                              width: 30,
+                              height: 30,
+                              decoration: BoxDecoration(
+                                color: isDark ? const Color(0xFF332A15) : const Color(0xFFF3EFE9),
                                 shape: BoxShape.circle,
                               ),
                               child: Center(
                                 child: Text(
                                   '$stepNum',
                                   style: GoogleFonts.plusJakartaSans(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w700,
-                                    color: AppColors.textPrimary,
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w800,
+                                    color: isDark ? const Color(0xFFFDE68A) : AppColors.textPrimary,
                                   ),
                                 ),
                               ),
                             ),
-                            const SizedBox(width: 12),
+                            const SizedBox(width: 14),
                             Expanded(
                               child: Text(
                                 instruction,
                                 style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 13,
-                                  height: 1.45,
-                                  color: AppColors.textPrimary,
+                                  fontSize: 13.5,
+                                  height: 1.5,
+                                  color: textColor,
                                 ),
                               ),
                             ),
@@ -546,12 +632,13 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
               ),
               const SizedBox(height: 20),
 
-              // Botón destacado para entrar al Modo Cocina interactivo
+              // Botón destacado: Iniciar Modo Cocina Paso a Paso
               SizedBox(
                 width: double.infinity,
-                height: 52,
-                child: ElevatedButton.icon(
+                height: 56,
+                child: ElevatedButton(
                   onPressed: () {
+                    HapticFeedback.mediumImpact();
                     Navigator.of(context).push(
                       MaterialPageRoute(
                         builder: (_) => CookingModeScreen(
@@ -561,25 +648,41 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                       ),
                     );
                   },
-                  icon: const Icon(Icons.soup_kitchen_rounded, color: Colors.white, size: 22),
-                  label: Text(
-                    'Iniciar Modo Cocina Paso a Paso',
-                    style: GoogleFonts.plusJakartaSans(
-                      color: Colors.white,
-                      fontSize: 15,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.darkButton,
+                    backgroundColor: isDark ? const Color(0xFFDDA743) : AppColors.darkButton,
+                    foregroundColor: isDark ? Colors.black : Colors.white,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius: BorderRadius.circular(18),
                     ),
-                    elevation: 2,
+                    elevation: 3,
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.soup_kitchen_rounded, size: 22),
+                      const SizedBox(width: 10),
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Iniciar Modo Cocina Paso a Paso',
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                          const Text(
+                            'Vista ampliada y temporizador integrado',
+                            style: TextStyle(fontSize: 10, fontWeight: FontWeight.w500),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
                 ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 14),
 
               if (currentRecipe.isUserCreated)
                 SizedBox(
@@ -596,8 +699,8 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                     icon: const Icon(Icons.edit_outlined, size: 18),
                     label: const Text('Editar esta receta'),
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: AppColors.textPrimary,
-                      side: const BorderSide(color: AppColors.border),
+                      foregroundColor: textColor,
+                      side: BorderSide(color: borderColor),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16),
                       ),
@@ -612,25 +715,33 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
     );
   }
 
-  Widget _buildTimeMetric(String label, String value) {
+  Widget _buildTimeMetric({
+    required IconData icon,
+    required String label,
+    required String value,
+    required Color textColor,
+    required Color mutedColor,
+  }) {
     return Column(
       children: [
+        Icon(icon, size: 16, color: mutedColor),
+        const SizedBox(height: 4),
         Text(
           label,
           style: GoogleFonts.plusJakartaSans(
-            fontSize: 10,
+            fontSize: 9.5,
             fontWeight: FontWeight.w700,
             letterSpacing: 0.8,
-            color: AppColors.textMuted,
+            color: mutedColor,
           ),
         ),
         const SizedBox(height: 3),
         Text(
           value,
           style: GoogleFonts.plusJakartaSans(
-            fontSize: 14,
-            fontWeight: FontWeight.w700,
-            color: AppColors.textPrimary,
+            fontSize: 13.5,
+            fontWeight: FontWeight.w800,
+            color: textColor,
           ),
         ),
       ],

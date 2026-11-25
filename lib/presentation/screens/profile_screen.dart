@@ -128,14 +128,24 @@ class ProfileScreen extends StatelessWidget {
     final userProvider = context.watch<UserProvider>();
     final recipeProvider = context.watch<RecipeProvider>();
     final themeProvider = context.watch<ThemeProvider>();
+    final isDark = themeProvider.isDarkMode;
 
     final user = userProvider.user;
     final publishedRecipes = recipeProvider.userCreatedRecipes;
     final savedCount = recipeProvider.favoriteRecipes.length;
     final favoriteCategory = recipeProvider.mostFavoriteCategory;
 
+    final bgColor = isDark ? AppColors.backgroundDark : AppColors.background;
+    final cardBg = isDark ? AppColors.cardDark : Colors.white;
+    final borderColor = isDark ? AppColors.borderDark : AppColors.border;
+    final textPrimary = isDark ? AppColors.textPrimaryDark : AppColors.textPrimary;
+    final textSecondary = isDark ? AppColors.textSecondaryDark : AppColors.textSecondary;
+    final textMuted = isDark ? AppColors.textSecondaryDark.withValues(alpha: 0.7) : AppColors.textMuted;
+    final dividerColor = isDark ? AppColors.borderDark : AppColors.borderLight;
+    final tagBg = isDark ? const Color(0xFF38322D) : const Color(0xFFF3EFE9);
+
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: bgColor,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -149,7 +159,7 @@ class ProfileScreen extends StatelessWidget {
                   style: GoogleFonts.playfairDisplay(
                     fontSize: 26,
                     fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary,
+                    color: textPrimary,
                   ),
                 ),
               ),
@@ -157,12 +167,12 @@ class ProfileScreen extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(18),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: cardBg,
                   borderRadius: BorderRadius.circular(22),
-                  border: Border.all(color: AppColors.border),
+                  border: Border.all(color: borderColor),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.02),
+                      color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.02),
                       blurRadius: 8,
                       offset: const Offset(0, 2),
                     ),
@@ -178,9 +188,12 @@ class ProfileScreen extends StatelessWidget {
                           width: 52,
                           height: 52,
                           decoration: BoxDecoration(
-                            color: const Color(0xFFF6ECE1),
+                            color: isDark ? const Color(0xFF38322D) : const Color(0xFFF6ECE1),
                             shape: BoxShape.circle,
-                            border: Border.all(color: const Color(0xFFE5D3C0), width: 1.5),
+                            border: Border.all(
+                              color: isDark ? const Color(0xFFDDA743) : const Color(0xFFE5D3C0),
+                              width: 1.5,
+                            ),
                           ),
                           child: Center(
                             child: Text(
@@ -188,7 +201,7 @@ class ProfileScreen extends StatelessWidget {
                               style: GoogleFonts.plusJakartaSans(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w700,
-                                color: const Color(0xFF854D0E),
+                                color: isDark ? const Color(0xFFDDA743) : const Color(0xFF854D0E),
                               ),
                             ),
                           ),
@@ -199,13 +212,13 @@ class ProfileScreen extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                user?.name ?? 'Matias Tapia',
+                                user?.name ?? 'Matías Tapia',
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: GoogleFonts.playfairDisplay(
                                   fontSize: 18,
                                   fontWeight: FontWeight.w700,
-                                  color: AppColors.textPrimary,
+                                  color: textPrimary,
                                 ),
                               ),
                               const SizedBox(height: 2),
@@ -215,7 +228,7 @@ class ProfileScreen extends StatelessWidget {
                                 overflow: TextOverflow.ellipsis,
                                 style: GoogleFonts.plusJakartaSans(
                                   fontSize: 12,
-                                  color: AppColors.textSecondary,
+                                  color: textSecondary,
                                 ),
                               ),
                               const SizedBox(height: 2),
@@ -223,7 +236,7 @@ class ProfileScreen extends StatelessWidget {
                                 'Miembro desde ${user?.memberSince ?? 'Marzo 2026'}',
                                 style: GoogleFonts.plusJakartaSans(
                                   fontSize: 11,
-                                  color: AppColors.textMuted,
+                                  color: textMuted,
                                 ),
                               ),
                             ],
@@ -231,14 +244,14 @@ class ProfileScreen extends StatelessWidget {
                         ),
                         IconButton(
                           icon: const Icon(Icons.logout_rounded, size: 20),
-                          color: AppColors.textSecondary,
+                          color: textSecondary,
                           tooltip: 'Cerrar sesión',
                           onPressed: () => _confirmLogout(context, userProvider),
                         ),
                       ],
                     ),
                     const SizedBox(height: 18),
-                    const Divider(color: AppColors.borderLight, height: 1),
+                    Divider(color: dividerColor, height: 1),
                     const SizedBox(height: 14),
 
                     Row(
@@ -252,7 +265,7 @@ class ProfileScreen extends StatelessWidget {
                               fontSize: 11,
                               fontWeight: FontWeight.w700,
                               letterSpacing: 1.1,
-                              color: AppColors.textMuted,
+                              color: textMuted,
                             ),
                           ),
                         ),
@@ -261,14 +274,14 @@ class ProfileScreen extends StatelessWidget {
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              const Icon(Icons.edit_outlined, size: 13, color: AppColors.textSecondary),
+                              Icon(Icons.edit_outlined, size: 13, color: textSecondary),
                               const SizedBox(width: 4),
                               Text(
                                 'Editar',
                                 style: GoogleFonts.plusJakartaSans(
                                   fontSize: 12,
                                   fontWeight: FontWeight.w600,
-                                  color: AppColors.textSecondary,
+                                  color: textSecondary,
                                 ),
                               ),
                             ],
@@ -282,8 +295,8 @@ class ProfileScreen extends StatelessWidget {
                           'Chef y cocinero aficionado. Amante de la cocina casera, recetas artesanales e ingredientes frescos.',
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 13,
-                        height: 1.4,
-                        color: AppColors.textPrimary,
+                        height: 1.45,
+                        color: textPrimary,
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -295,14 +308,14 @@ class ProfileScreen extends StatelessWidget {
                         return Container(
                           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFF3EFE9),
+                            color: tagBg,
                             borderRadius: BorderRadius.circular(14),
                           ),
                           child: Text(
                             tag,
                             style: GoogleFonts.plusJakartaSans(
                               fontSize: 12,
-                              color: AppColors.textSecondary,
+                              color: textSecondary,
                               fontWeight: FontWeight.w500,
                             ),
                           ),
@@ -320,6 +333,11 @@ class ProfileScreen extends StatelessWidget {
                     child: _buildStatCard(
                       label: 'PUBLICADAS',
                       value: publishedRecipes.length.toString(),
+                      isDark: isDark,
+                      cardBg: cardBg,
+                      borderColor: borderColor,
+                      textPrimary: textPrimary,
+                      textMuted: textMuted,
                     ),
                   ),
                   const SizedBox(width: 10),
@@ -327,6 +345,11 @@ class ProfileScreen extends StatelessWidget {
                     child: _buildStatCard(
                       label: 'GUARDADAS',
                       value: savedCount.toString(),
+                      isDark: isDark,
+                      cardBg: cardBg,
+                      borderColor: borderColor,
+                      textPrimary: textPrimary,
+                      textMuted: textMuted,
                     ),
                   ),
                   const SizedBox(width: 10),
@@ -335,6 +358,11 @@ class ProfileScreen extends StatelessWidget {
                       label: 'FAVORITA',
                       value: favoriteCategory,
                       isText: true,
+                      isDark: isDark,
+                      cardBg: cardBg,
+                      borderColor: borderColor,
+                      textPrimary: textPrimary,
+                      textMuted: textMuted,
                     ),
                   ),
                 ],
@@ -345,14 +373,12 @@ class ProfileScreen extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                 decoration: BoxDecoration(
-                  color: themeProvider.isDarkMode ? AppColors.cardDark : Colors.white,
+                  color: cardBg,
                   borderRadius: BorderRadius.circular(18),
-                  border: Border.all(
-                    color: themeProvider.isDarkMode ? AppColors.borderDark : AppColors.border,
-                  ),
+                  border: Border.all(color: borderColor),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.02),
+                      color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.02),
                       blurRadius: 6,
                       offset: const Offset(0, 2),
                     ),
@@ -364,12 +390,12 @@ class ProfileScreen extends StatelessWidget {
                       width: 38,
                       height: 38,
                       decoration: BoxDecoration(
-                        color: themeProvider.isDarkMode ? const Color(0xFF2C2825) : const Color(0xFFF3EFE9),
+                        color: isDark ? const Color(0xFF2C2825) : const Color(0xFFF3EFE9),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Icon(
-                        themeProvider.isDarkMode ? Icons.dark_mode_rounded : Icons.light_mode_rounded,
-                        color: themeProvider.isDarkMode ? const Color(0xFFFACC15) : AppColors.darkButton,
+                        isDark ? Icons.dark_mode_rounded : Icons.light_mode_rounded,
+                        color: isDark ? const Color(0xFFFACC15) : AppColors.darkButton,
                         size: 20,
                       ),
                     ),
@@ -383,25 +409,26 @@ class ProfileScreen extends StatelessWidget {
                             style: GoogleFonts.plusJakartaSans(
                               fontSize: 14,
                               fontWeight: FontWeight.w700,
-                              color: themeProvider.isDarkMode ? AppColors.textPrimaryDark : AppColors.textPrimary,
+                              color: textPrimary,
                             ),
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            themeProvider.isDarkMode
+                            isDark
                                 ? 'Ambiente cálido de baja luz para cocinar'
                                 : 'Tema claro rústico de papel pergamino',
                             style: GoogleFonts.plusJakartaSans(
                               fontSize: 11,
-                              color: themeProvider.isDarkMode ? AppColors.textSecondaryDark : AppColors.textMuted,
+                              color: textMuted,
                             ),
                           ),
                         ],
                       ),
                     ),
                     Switch(
-                      value: themeProvider.isDarkMode,
-                      activeColor: const Color(0xFFDDA743),
+                      value: isDark,
+                      activeThumbColor: const Color(0xFFDDA743),
+                      activeTrackColor: const Color(0xFFDDA743).withValues(alpha: 0.5),
                       onChanged: (val) {
                         themeProvider.toggleTheme(val);
                       },
@@ -421,7 +448,7 @@ class ProfileScreen extends StatelessWidget {
                       style: GoogleFonts.playfairDisplay(
                         fontSize: 18,
                         fontWeight: FontWeight.w700,
-                        color: AppColors.textPrimary,
+                        color: textPrimary,
                       ),
                     ),
                   ),
@@ -437,7 +464,7 @@ class ProfileScreen extends StatelessWidget {
                       ),
                     ),
                     style: TextButton.styleFrom(
-                      foregroundColor: AppColors.darkButton,
+                      foregroundColor: isDark ? const Color(0xFFDDA743) : AppColors.darkButton,
                     ),
                   ),
                 ],
@@ -448,9 +475,9 @@ class ProfileScreen extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: cardBg,
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: AppColors.border),
+                    border: Border.all(color: borderColor),
                   ),
                   child: Center(
                     child: Column(
@@ -462,18 +489,22 @@ class ProfileScreen extends StatelessWidget {
                           style: GoogleFonts.playfairDisplay(
                             fontSize: 16,
                             fontWeight: FontWeight.w700,
+                            color: textPrimary,
                           ),
                         ),
                         const SizedBox(height: 4),
-                        const Text(
+                        Text(
                           'Comparte tu primera creación culinaria artesanal.',
-                          style: TextStyle(fontSize: 12, color: AppColors.textMuted),
+                          style: TextStyle(fontSize: 12, color: textMuted),
                         ),
                         const SizedBox(height: 12),
                         ElevatedButton(
                           onPressed: onGoToCreate,
-                          style: ElevatedButton.styleFrom(backgroundColor: AppColors.darkButton),
-                          child: const Text('Crear Receta', style: TextStyle(color: Colors.white)),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: isDark ? const Color(0xFFDDA743) : AppColors.darkButton,
+                            foregroundColor: isDark ? const Color(0xFF1E1A17) : Colors.white,
+                          ),
+                          child: const Text('Crear Receta'),
                         ),
                       ],
                     ),
@@ -515,16 +546,21 @@ class ProfileScreen extends StatelessWidget {
     required String label,
     required String value,
     bool isText = false,
+    required bool isDark,
+    required Color cardBg,
+    required Color borderColor,
+    required Color textPrimary,
+    required Color textMuted,
   }) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 6),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: cardBg,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(color: borderColor),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.02),
+            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.02),
             blurRadius: 6,
             offset: const Offset(0, 2),
           ),
@@ -540,7 +576,7 @@ class ProfileScreen extends StatelessWidget {
               fontSize: 10,
               fontWeight: FontWeight.w700,
               letterSpacing: 0.6,
-              color: AppColors.textMuted,
+              color: textMuted,
             ),
           ),
           const SizedBox(height: 6),
@@ -552,12 +588,12 @@ class ProfileScreen extends StatelessWidget {
                 ? GoogleFonts.playfairDisplay(
                     fontSize: 15,
                     fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary,
+                    color: textPrimary,
                   )
                 : GoogleFonts.plusJakartaSans(
                     fontSize: 19,
                     fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary,
+                    color: textPrimary,
                   ),
           ),
         ],

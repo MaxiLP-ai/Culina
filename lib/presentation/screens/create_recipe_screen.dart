@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../domain/entities/ingredient.dart';
 import '../../domain/entities/recipe.dart';
 import '../providers/recipe_provider.dart';
+import '../providers/theme_provider.dart';
 import '../providers/user_provider.dart';
 import '../theme/app_theme.dart';
 import 'recipe_detail_screen.dart';
@@ -143,6 +145,30 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
         builder: (_) => RecipeDetailScreen(recipe: preview),
       ),
     );
+  }
+
+  void _adjustPrepTime(int delta) {
+    final current = int.tryParse(_prepTimeController.text) ?? 15;
+    final updated = (current + delta).clamp(0, 360);
+    setState(() {
+      _prepTimeController.text = updated.toString();
+    });
+  }
+
+  void _adjustCookTime(int delta) {
+    final current = int.tryParse(_cookTimeController.text) ?? 20;
+    final updated = (current + delta).clamp(0, 360);
+    setState(() {
+      _cookTimeController.text = updated.toString();
+    });
+  }
+
+  void _adjustServings(int delta) {
+    final current = int.tryParse(_servingsController.text) ?? 2;
+    final updated = (current + delta).clamp(1, 30);
+    setState(() {
+      _servingsController.text = updated.toString();
+    });
   }
 
   void _addIngredientDialog() {
@@ -290,11 +316,25 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider = context.watch<ThemeProvider>();
+    final isDark = themeProvider.isDarkMode;
+
+    final bgColor = isDark ? AppColors.backgroundDark : AppColors.background;
+    final cardBg = isDark ? AppColors.cardDark : Colors.white;
+    final borderColor = isDark ? AppColors.borderDark : AppColors.border;
+    final textPrimary = isDark ? AppColors.textPrimaryDark : AppColors.textPrimary;
+    final textSecondary = isDark ? AppColors.textSecondaryDark : AppColors.textSecondary;
+    final textMuted = isDark ? AppColors.textSecondaryDark.withValues(alpha: 0.7) : AppColors.textMuted;
+    final accentColor = isDark ? const Color(0xFFDDA743) : AppColors.darkButton;
+    final inputBg = isDark ? const Color(0xFF2C2825) : const Color(0xFFFAF9F6);
+
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: bgColor,
       appBar: AppBar(
+        backgroundColor: cardBg,
+        elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_rounded),
+          icon: Icon(Icons.arrow_back_rounded, color: textPrimary),
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: Text(
@@ -302,7 +342,7 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
           style: GoogleFonts.playfairDisplay(
             fontSize: 20,
             fontWeight: FontWeight.w700,
-            color: AppColors.textPrimary,
+            color: textPrimary,
           ),
         ),
       ),
@@ -312,7 +352,7 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Header Row: Title & Subtitle + Previsualizar Button (Protected against overflow)
+              // Header Row: Title & Subtitle + Previsualizar Button
               Row(
                 children: [
                   Expanded(
@@ -326,17 +366,17 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                           style: GoogleFonts.playfairDisplay(
                             fontSize: 22,
                             fontWeight: FontWeight.w700,
-                            color: AppColors.textPrimary,
+                            color: textPrimary,
                           ),
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          'Ficha para cocinar en Android',
+                          'Crea o ajusta tu preparación culinaria',
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: 12,
-                            color: AppColors.textSecondary,
+                            color: textSecondary,
                           ),
                         ),
                       ],
@@ -345,17 +385,18 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                   const SizedBox(width: 8),
                   OutlinedButton.icon(
                     onPressed: _previewRecipe,
-                    icon: const Icon(Icons.visibility_outlined, size: 16),
+                    icon: Icon(Icons.visibility_outlined, size: 16, color: textPrimary),
                     label: Text(
                       'Previsualizar',
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
+                        color: textPrimary,
                       ),
                     ),
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: AppColors.textPrimary,
-                      side: const BorderSide(color: AppColors.border),
+                      foregroundColor: textPrimary,
+                      side: BorderSide(color: borderColor),
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16),
@@ -366,15 +407,16 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
               ),
               const SizedBox(height: 16),
 
+              // Section 1: Información Principal
               Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: cardBg,
                   borderRadius: BorderRadius.circular(22),
-                  border: Border.all(color: AppColors.border),
+                  border: Border.all(color: borderColor),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.02),
+                      color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.02),
                       blurRadius: 8,
                       offset: const Offset(0, 2),
                     ),
@@ -391,7 +433,7 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                           fontSize: 11,
                           fontWeight: FontWeight.w700,
                           letterSpacing: 1.1,
-                          color: AppColors.textMuted,
+                          color: textMuted,
                         ),
                       ),
                       const SizedBox(height: 14),
@@ -401,13 +443,14 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
-                          color: AppColors.textPrimary,
+                          color: textPrimary,
                         ),
                       ),
                       const SizedBox(height: 6),
                       TextFormField(
                         controller: _titleController,
-                        decoration: _inputDecoration('ej. Risotto de Portobello y Salvia'),
+                        style: GoogleFonts.plusJakartaSans(fontSize: 13, color: textPrimary),
+                        decoration: _inputDecoration('ej. Risotto de Portobello y Salvia', inputBg, borderColor, textMuted, accentColor),
                         validator: (v) => v == null || v.trim().isEmpty ? 'El nombre es obligatorio' : null,
                       ),
                       const SizedBox(height: 14),
@@ -417,13 +460,14 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
-                          color: AppColors.textPrimary,
+                          color: textPrimary,
                         ),
                       ),
                       const SizedBox(height: 6),
                       TextFormField(
                         controller: _subtitleController,
-                        decoration: _inputDecoration('ej. Arroz arborio cremoso con vino blanco seco'),
+                        style: GoogleFonts.plusJakartaSans(fontSize: 13, color: textPrimary),
+                        decoration: _inputDecoration('ej. Arroz arborio cremoso con vino blanco seco', inputBg, borderColor, textMuted, accentColor),
                       ),
                       const SizedBox(height: 14),
 
@@ -432,17 +476,19 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
-                          color: AppColors.textPrimary,
+                          color: textPrimary,
                         ),
                       ),
                       const SizedBox(height: 6),
                       TextFormField(
                         controller: _descriptionController,
                         maxLines: 3,
-                        decoration: _inputDecoration('Describe el origen o maridaje perfecto...'),
+                        style: GoogleFonts.plusJakartaSans(fontSize: 13, color: textPrimary),
+                        decoration: _inputDecoration('Describe el origen o maridaje perfecto...', inputBg, borderColor, textMuted, accentColor),
                       ),
                       const SizedBox(height: 16),
 
+                      // Categoría y Dificultad
                       Row(
                         children: [
                           Expanded(
@@ -454,18 +500,19 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                                   style: GoogleFonts.plusJakartaSans(
                                     fontSize: 12,
                                     fontWeight: FontWeight.w600,
-                                    color: AppColors.textSecondary,
+                                    color: textSecondary,
                                   ),
                                 ),
                                 const SizedBox(height: 6),
                                 DropdownButtonFormField<String>(
                                   initialValue: _category,
-                                  decoration: _dropdownDecoration(),
-                                  icon: const Icon(Icons.keyboard_arrow_down_rounded, size: 18),
+                                  dropdownColor: cardBg,
+                                  decoration: _dropdownDecoration(inputBg, borderColor, accentColor),
+                                  icon: Icon(Icons.keyboard_arrow_down_rounded, size: 18, color: textSecondary),
                                   items: _categories.map((c) {
                                     return DropdownMenuItem(
                                       value: c,
-                                      child: Text(c, style: const TextStyle(fontSize: 13)),
+                                      child: Text(c, style: GoogleFonts.plusJakartaSans(fontSize: 13, color: textPrimary)),
                                     );
                                   }).toList(),
                                   onChanged: (val) {
@@ -485,18 +532,19 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                                   style: GoogleFonts.plusJakartaSans(
                                     fontSize: 12,
                                     fontWeight: FontWeight.w600,
-                                    color: AppColors.textSecondary,
+                                    color: textSecondary,
                                   ),
                                 ),
                                 const SizedBox(height: 6),
                                 DropdownButtonFormField<String>(
                                   initialValue: _difficulty,
-                                  decoration: _dropdownDecoration(),
-                                  icon: const Icon(Icons.keyboard_arrow_down_rounded, size: 18),
+                                  dropdownColor: cardBg,
+                                  decoration: _dropdownDecoration(inputBg, borderColor, accentColor),
+                                  icon: Icon(Icons.keyboard_arrow_down_rounded, size: 18, color: textSecondary),
                                   items: _difficulties.map((d) {
                                     return DropdownMenuItem(
                                       value: d,
-                                      child: Text(d, style: const TextStyle(fontSize: 13)),
+                                      child: Text(d, style: GoogleFonts.plusJakartaSans(fontSize: 13, color: textPrimary)),
                                     );
                                   }).toList(),
                                   onChanged: (val) {
@@ -508,91 +556,50 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 18),
 
+                      // Steppers for Prep, Cook, and Servings
                       Row(
                         children: [
                           Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Prep (min)',
-                                  style: GoogleFonts.plusJakartaSans(
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w600,
-                                    color: AppColors.textSecondary,
-                                  ),
-                                ),
-                                const SizedBox(height: 6),
-                                TextFormField(
-                                  controller: _prepTimeController,
-                                  keyboardType: TextInputType.number,
-                                  textAlign: TextAlign.center,
-                                  decoration: _dropdownDecoration(),
-                                  validator: (v) {
-                                    final val = int.tryParse(v ?? '');
-                                    if (val == null || val < 0) return 'Inválido';
-                                    return null;
-                                  },
-                                ),
-                              ],
+                            child: _buildStepperField(
+                              label: 'Prep (min)',
+                              controller: _prepTimeController,
+                              onDecrement: () => _adjustPrepTime(-5),
+                              onIncrement: () => _adjustPrepTime(5),
+                              isDark: isDark,
+                              inputBg: inputBg,
+                              borderColor: borderColor,
+                              textPrimary: textPrimary,
+                              textSecondary: textSecondary,
                             ),
                           ),
                           const SizedBox(width: 10),
                           Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Cocción (min)',
-                                  style: GoogleFonts.plusJakartaSans(
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w600,
-                                    color: AppColors.textSecondary,
-                                  ),
-                                ),
-                                const SizedBox(height: 6),
-                                TextFormField(
-                                  controller: _cookTimeController,
-                                  keyboardType: TextInputType.number,
-                                  textAlign: TextAlign.center,
-                                  decoration: _dropdownDecoration(),
-                                  validator: (v) {
-                                    final val = int.tryParse(v ?? '');
-                                    if (val == null || val < 0) return 'Inválido';
-                                    return null;
-                                  },
-                                ),
-                              ],
+                            child: _buildStepperField(
+                              label: 'Cocción (min)',
+                              controller: _cookTimeController,
+                              onDecrement: () => _adjustCookTime(-5),
+                              onIncrement: () => _adjustCookTime(5),
+                              isDark: isDark,
+                              inputBg: inputBg,
+                              borderColor: borderColor,
+                              textPrimary: textPrimary,
+                              textSecondary: textSecondary,
                             ),
                           ),
                           const SizedBox(width: 10),
                           Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Porciones',
-                                  style: GoogleFonts.plusJakartaSans(
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w600,
-                                    color: AppColors.textSecondary,
-                                  ),
-                                ),
-                                const SizedBox(height: 6),
-                                TextFormField(
-                                  controller: _servingsController,
-                                  keyboardType: TextInputType.number,
-                                  textAlign: TextAlign.center,
-                                  decoration: _dropdownDecoration(),
-                                  validator: (v) {
-                                    final val = int.tryParse(v ?? '');
-                                    if (val == null || val <= 0) return '> 0';
-                                    return null;
-                                  },
-                                ),
-                              ],
+                            child: _buildStepperField(
+                              label: 'Porciones',
+                              controller: _servingsController,
+                              onDecrement: () => _adjustServings(-1),
+                              onIncrement: () => _adjustServings(1),
+                              isDark: isDark,
+                              inputBg: inputBg,
+                              borderColor: borderColor,
+                              textPrimary: textPrimary,
+                              textSecondary: textSecondary,
                             ),
                           ),
                         ],
@@ -603,15 +610,16 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
               ),
               const SizedBox(height: 16),
 
+              // Section 2: Ícono y Color
               Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: cardBg,
                   borderRadius: BorderRadius.circular(22),
-                  border: Border.all(color: AppColors.border),
+                  border: Border.all(color: borderColor),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.02),
+                      color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.02),
                       blurRadius: 8,
                       offset: const Offset(0, 2),
                     ),
@@ -621,12 +629,12 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      '2. ÍCONO Y COLOR',
+                      '2. ÍCONO Y COLOR ARTESANAL',
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 11,
                         fontWeight: FontWeight.w700,
                         letterSpacing: 1.1,
-                        color: AppColors.textMuted,
+                        color: textMuted,
                       ),
                     ),
                     const SizedBox(height: 14),
@@ -637,16 +645,23 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                       children: _availableIcons.map((icon) {
                         final isSelected = _selectedIcon == icon;
                         return GestureDetector(
-                          onTap: () => setState(() => _selectedIcon = icon),
+                          onTap: () {
+                            HapticFeedback.selectionClick();
+                            setState(() => _selectedIcon = icon);
+                          },
                           child: AnimatedContainer(
                             duration: const Duration(milliseconds: 150),
                             width: 44,
                             height: 44,
                             decoration: BoxDecoration(
-                              color: isSelected ? const Color(0xFFFEF3C7) : const Color(0xFFFAF9F6),
+                              color: isSelected
+                                  ? (isDark ? const Color(0xFF423722) : const Color(0xFFFEF3C7))
+                                  : inputBg,
                               shape: BoxShape.circle,
                               border: Border.all(
-                                color: isSelected ? const Color(0xFFD97706) : AppColors.border,
+                                color: isSelected
+                                    ? const Color(0xFFD97706)
+                                    : borderColor,
                                 width: isSelected ? 2 : 1,
                               ),
                             ),
@@ -667,15 +682,20 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                         final color = AppColors.getThemeColor(colorName);
 
                         return GestureDetector(
-                          onTap: () => setState(() => _selectedColorTheme = colorName),
+                          onTap: () {
+                            HapticFeedback.selectionClick();
+                            setState(() => _selectedColorTheme = colorName);
+                          },
                           child: AnimatedContainer(
                             duration: const Duration(milliseconds: 150),
                             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
                             decoration: BoxDecoration(
-                              color: isSelected ? const Color(0xFFF3EFE9) : Colors.white,
+                              color: isSelected
+                                  ? (isDark ? const Color(0xFF38322D) : const Color(0xFFF3EFE9))
+                                  : inputBg,
                               borderRadius: BorderRadius.circular(16),
                               border: Border.all(
-                                color: isSelected ? AppColors.darkButton : AppColors.border,
+                                color: isSelected ? accentColor : borderColor,
                                 width: isSelected ? 1.5 : 1,
                               ),
                             ),
@@ -696,7 +716,7 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                                   style: GoogleFonts.plusJakartaSans(
                                     fontSize: 12,
                                     fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-                                    color: AppColors.textPrimary,
+                                    color: textPrimary,
                                   ),
                                 ),
                               ],
@@ -710,12 +730,20 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
               ),
               const SizedBox(height: 16),
 
+              // Section 3: Ingredientes
               Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: cardBg,
                   borderRadius: BorderRadius.circular(22),
-                  border: Border.all(color: AppColors.border),
+                  border: Border.all(color: borderColor),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.02),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -729,7 +757,7 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                             fontSize: 11,
                             fontWeight: FontWeight.w700,
                             letterSpacing: 1.1,
-                            color: AppColors.textMuted,
+                            color: textMuted,
                           ),
                         ),
                         TextButton.icon(
@@ -737,7 +765,7 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                           icon: const Icon(Icons.add, size: 14),
                           label: const Text('Agregar', style: TextStyle(fontSize: 12)),
                           style: TextButton.styleFrom(
-                            foregroundColor: AppColors.darkButton,
+                            foregroundColor: accentColor,
                             visualDensity: VisualDensity.compact,
                           ),
                         ),
@@ -751,16 +779,19 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                         padding: const EdgeInsets.symmetric(vertical: 4),
                         child: Row(
                           children: [
-                            const Icon(Icons.circle, size: 6, color: AppColors.textMuted),
+                            Icon(Icons.circle, size: 6, color: textMuted),
                             const SizedBox(width: 8),
                             Expanded(
                               child: Text(
                                 '${ing.formatAmountForServings(1, 1)} ${ing.unit} ${ing.name}',
-                                style: const TextStyle(fontSize: 13),
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 13,
+                                  color: textPrimary,
+                                ),
                               ),
                             ),
                             IconButton(
-                              icon: const Icon(Icons.close_rounded, size: 16, color: Colors.grey),
+                              icon: Icon(Icons.close_rounded, size: 16, color: textMuted),
                               onPressed: () => setState(() => _ingredients.removeAt(i)),
                             ),
                           ],
@@ -772,12 +803,20 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
               ),
               const SizedBox(height: 16),
 
+              // Section 4: Pasos
               Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: cardBg,
                   borderRadius: BorderRadius.circular(22),
-                  border: Border.all(color: AppColors.border),
+                  border: Border.all(color: borderColor),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.02),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -786,12 +825,12 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          '4. PASOS (${_steps.length})',
+                          '4. PASOS DE PREPARACIÓN (${_steps.length})',
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: 11,
                             fontWeight: FontWeight.w700,
                             letterSpacing: 1.1,
-                            color: AppColors.textMuted,
+                            color: textMuted,
                           ),
                         ),
                         TextButton.icon(
@@ -799,7 +838,7 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                           icon: const Icon(Icons.add, size: 14),
                           label: const Text('Agregar', style: TextStyle(fontSize: 12)),
                           style: TextButton.styleFrom(
-                            foregroundColor: AppColors.darkButton,
+                            foregroundColor: accentColor,
                             visualDensity: VisualDensity.compact,
                           ),
                         ),
@@ -815,19 +854,30 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             CircleAvatar(
-                              radius: 10,
-                              backgroundColor: const Color(0xFFF3EFE9),
-                              child: Text('${i + 1}', style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+                              radius: 11,
+                              backgroundColor: isDark ? const Color(0xFF38322D) : const Color(0xFFF3EFE9),
+                              child: Text(
+                                '${i + 1}',
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                  color: isDark ? const Color(0xFFDDA743) : AppColors.textPrimary,
+                                ),
+                              ),
                             ),
-                            const SizedBox(width: 8),
+                            const SizedBox(width: 10),
                             Expanded(
                               child: Text(
                                 step,
-                                style: const TextStyle(fontSize: 13, height: 1.3),
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 13,
+                                  height: 1.35,
+                                  color: textPrimary,
+                                ),
                               ),
                             ),
                             IconButton(
-                              icon: const Icon(Icons.close_rounded, size: 16, color: Colors.grey),
+                              icon: Icon(Icons.close_rounded, size: 16, color: textMuted),
                               onPressed: () => setState(() => _steps.removeAt(i)),
                             ),
                           ],
@@ -845,8 +895,8 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                 child: ElevatedButton(
                   onPressed: _saveRecipe,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.darkButton,
-                    foregroundColor: Colors.white,
+                    backgroundColor: accentColor,
+                    foregroundColor: isDark ? const Color(0xFF1E1A17) : Colors.white,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
                     ),
@@ -856,8 +906,7 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                     isEditing ? 'Actualizar Receta' : 'Guardar Receta',
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
                 ),
@@ -870,47 +919,127 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
     );
   }
 
-  InputDecoration _inputDecoration(String hint) {
+  Widget _buildStepperField({
+    required String label,
+    required TextEditingController controller,
+    required VoidCallback onDecrement,
+    required VoidCallback onIncrement,
+    required bool isDark,
+    required Color inputBg,
+    required Color borderColor,
+    required Color textPrimary,
+    required Color textSecondary,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: GoogleFonts.plusJakartaSans(
+            fontSize: 11,
+            fontWeight: FontWeight.w600,
+            color: textSecondary,
+          ),
+        ),
+        const SizedBox(height: 6),
+        Container(
+          height: 44,
+          decoration: BoxDecoration(
+            color: inputBg,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: borderColor),
+          ),
+          child: Row(
+            children: [
+              InkWell(
+                onTap: () {
+                  HapticFeedback.selectionClick();
+                  onDecrement();
+                },
+                borderRadius: const BorderRadius.horizontal(left: Radius.circular(12)),
+                child: Container(
+                  width: 28,
+                  alignment: Alignment.center,
+                  child: Icon(Icons.remove_rounded, size: 14, color: textSecondary),
+                ),
+              ),
+              Expanded(
+                child: TextFormField(
+                  controller: controller,
+                  keyboardType: TextInputType.number,
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: textPrimary,
+                  ),
+                  decoration: const InputDecoration(
+                    border: InputBorder.none,
+                    contentPadding: EdgeInsets.zero,
+                    isDense: true,
+                  ),
+                ),
+              ),
+              InkWell(
+                onTap: () {
+                  HapticFeedback.selectionClick();
+                  onIncrement();
+                },
+                borderRadius: const BorderRadius.horizontal(right: Radius.circular(12)),
+                child: Container(
+                  width: 28,
+                  alignment: Alignment.center,
+                  child: Icon(Icons.add_rounded, size: 14, color: textSecondary),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  InputDecoration _inputDecoration(String hint, Color fillColor, Color borderColor, Color hintColor, Color focusColor) {
     return InputDecoration(
       hintText: hint,
       hintStyle: GoogleFonts.plusJakartaSans(
-        color: AppColors.textMuted,
+        color: hintColor,
         fontSize: 13,
       ),
       contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       filled: true,
-      fillColor: const Color(0xFFFAF9F6),
+      fillColor: fillColor,
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: AppColors.border),
+        borderSide: BorderSide(color: borderColor),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: AppColors.border),
+        borderSide: BorderSide(color: borderColor),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: AppColors.darkButton, width: 1.5),
+        borderSide: BorderSide(color: focusColor, width: 1.5),
       ),
     );
   }
 
-  InputDecoration _dropdownDecoration() {
+  InputDecoration _dropdownDecoration(Color fillColor, Color borderColor, Color focusColor) {
     return InputDecoration(
       contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       filled: true,
-      fillColor: const Color(0xFFFAF9F6),
+      fillColor: fillColor,
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: AppColors.border),
+        borderSide: BorderSide(color: borderColor),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: AppColors.border),
+        borderSide: BorderSide(color: borderColor),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: AppColors.darkButton, width: 1.5),
+        borderSide: BorderSide(color: focusColor, width: 1.5),
       ),
     );
   }

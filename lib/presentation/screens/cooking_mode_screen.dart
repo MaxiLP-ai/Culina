@@ -2,7 +2,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import '../../domain/entities/recipe.dart';
+import '../providers/theme_provider.dart';
 import '../theme/app_theme.dart';
 import '../widgets/culina_food_graphic.dart';
 
@@ -130,9 +132,15 @@ class _CookingModeScreenState extends State<CookingModeScreen> {
   }
 
   void _showIngredientsSheet() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cardBg = isDark ? AppColors.cardDark : Colors.white;
+    final textPrimary = isDark ? AppColors.textPrimaryDark : AppColors.textPrimary;
+    final textSecondary = isDark ? AppColors.textSecondaryDark : AppColors.textSecondary;
+    final dividerColor = isDark ? AppColors.borderDark : AppColors.borderLight;
+
     showModalBottomSheet(
       context: context,
-      backgroundColor: Colors.white,
+      backgroundColor: cardBg,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
@@ -155,32 +163,32 @@ class _CookingModeScreenState extends State<CookingModeScreen> {
                           style: GoogleFonts.playfairDisplay(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
-                            color: AppColors.textPrimary,
+                            color: textPrimary,
                           ),
                         ),
                         Text(
                           'Calculado para ${widget.servings} ${widget.servings == 1 ? "porción" : "porciones"}',
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: 12,
-                            color: AppColors.textSecondary,
+                            color: textSecondary,
                           ),
                         ),
                       ],
                     ),
                     IconButton(
-                      icon: const Icon(Icons.close_rounded),
+                      icon: Icon(Icons.close_rounded, color: textPrimary),
                       onPressed: () => Navigator.pop(ctx),
                     ),
                   ],
                 ),
                 const SizedBox(height: 12),
-                const Divider(height: 1, color: AppColors.borderLight),
+                Divider(height: 1, color: dividerColor),
                 const SizedBox(height: 12),
                 Flexible(
                   child: ListView.separated(
                     shrinkWrap: true,
                     itemCount: widget.recipe.ingredients.length,
-                    separatorBuilder: (_, __) => const Divider(height: 1, color: AppColors.borderLight),
+                    separatorBuilder: (_, _) => Divider(height: 1, color: dividerColor),
                     itemBuilder: (context, index) {
                       final item = widget.recipe.ingredients[index];
                       final amount = item.formatAmountForServings(widget.recipe.servings, widget.servings);
@@ -195,16 +203,23 @@ class _CookingModeScreenState extends State<CookingModeScreen> {
                                 style: GoogleFonts.plusJakartaSans(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w500,
-                                  color: AppColors.textPrimary,
+                                  color: textPrimary,
                                 ),
                               ),
                             ),
-                            Text(
-                              '$amount ${item.unit}',
-                              style: GoogleFonts.plusJakartaSans(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w700,
-                                color: AppColors.textSecondary,
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                              decoration: BoxDecoration(
+                                color: isDark ? const Color(0xFF38322D) : const Color(0xFFF3EFE9),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Text(
+                                '$amount ${item.unit}',
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w700,
+                                  color: isDark ? const Color(0xFFDDA743) : AppColors.textPrimary,
+                                ),
                               ),
                             ),
                           ],
@@ -283,16 +298,29 @@ class _CookingModeScreenState extends State<CookingModeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider = context.watch<ThemeProvider>();
+    final isDark = themeProvider.isDarkMode;
+
     final steps = widget.recipe.steps;
     final totalSteps = steps.isNotEmpty ? steps.length : 1;
     final progress = (totalSteps > 0) ? (_currentStepIndex + 1) / totalSteps : 1.0;
     final currentInstruction = steps.isNotEmpty ? steps[_currentStepIndex] : 'Preparar los ingredientes y servir al gusto.';
 
+    final bgColor = isDark ? AppColors.backgroundDark : AppColors.background;
+    final cardBg = isDark ? AppColors.cardDark : Colors.white;
+    final borderColor = isDark ? AppColors.borderDark : AppColors.border;
+    final textPrimary = isDark ? AppColors.textPrimaryDark : AppColors.textPrimary;
+    final textSecondary = isDark ? AppColors.textSecondaryDark : AppColors.textSecondary;
+    final textMuted = isDark ? AppColors.textSecondaryDark.withValues(alpha: 0.7) : AppColors.textMuted;
+    final accentColor = isDark ? const Color(0xFFDDA743) : AppColors.darkButton;
+
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: bgColor,
       appBar: AppBar(
+        backgroundColor: cardBg,
+        elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.close_rounded),
+          icon: Icon(Icons.close_rounded, color: textPrimary),
           onPressed: () => Navigator.pop(context),
         ),
         title: Column(
@@ -314,7 +342,7 @@ class _CookingModeScreenState extends State<CookingModeScreen> {
               style: GoogleFonts.playfairDisplay(
                 fontSize: 16,
                 fontWeight: FontWeight.w700,
-                color: AppColors.textPrimary,
+                color: textPrimary,
               ),
             ),
           ],
@@ -324,7 +352,9 @@ class _CookingModeScreenState extends State<CookingModeScreen> {
             onPressed: _showIngredientsSheet,
             icon: const Icon(Icons.kitchen_rounded, size: 18),
             label: const Text('Ingredientes'),
-            style: TextButton.styleFrom(foregroundColor: AppColors.darkButton),
+            style: TextButton.styleFrom(
+              foregroundColor: isDark ? const Color(0xFFDDA743) : AppColors.darkButton,
+            ),
           ),
           const SizedBox(width: 8),
         ],
@@ -335,8 +365,10 @@ class _CookingModeScreenState extends State<CookingModeScreen> {
             // Barra de progreso lineal
             LinearProgressIndicator(
               value: progress,
-              backgroundColor: AppColors.borderLight,
-              valueColor: const AlwaysStoppedAnimation<Color>(AppColors.darkButton),
+              backgroundColor: isDark ? const Color(0xFF38322D) : AppColors.borderLight,
+              valueColor: AlwaysStoppedAnimation<Color>(
+                isDark ? const Color(0xFFDDA743) : AppColors.darkButton,
+              ),
               minHeight: 4,
             ),
 
@@ -346,14 +378,14 @@ class _CookingModeScreenState extends State<CookingModeScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Badge del paso actual
+                    // Badge del paso actual y porcentaje
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                           decoration: BoxDecoration(
-                            color: AppColors.darkButton,
+                            color: isDark ? const Color(0xFFDDA743) : AppColors.darkButton,
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: Text(
@@ -361,33 +393,40 @@ class _CookingModeScreenState extends State<CookingModeScreen> {
                             style: GoogleFonts.plusJakartaSans(
                               fontSize: 12,
                               fontWeight: FontWeight.w700,
-                              color: Colors.white,
+                              color: isDark ? const Color(0xFF1E1A17) : Colors.white,
                             ),
                           ),
                         ),
-                        Text(
-                          '${(progress * 100).toInt()}% completado',
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.textMuted,
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: isDark ? const Color(0xFF2C2825) : const Color(0xFFF3EFE9),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            '${(progress * 100).toInt()}% completado',
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              color: textMuted,
+                            ),
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 18),
+                    const SizedBox(height: 16),
 
-                    // Tarjeta principal con la instrucción del paso en tamaño legible para cocina
+                    // Tarjeta principal con la instrucción del paso en tamaño amplio y legible
                     Container(
                       width: double.infinity,
                       padding: const EdgeInsets.all(22),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: cardBg,
                         borderRadius: BorderRadius.circular(24),
-                        border: Border.all(color: AppColors.border),
+                        border: Border.all(color: borderColor),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.03),
+                            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.03),
                             blurRadius: 10,
                             offset: const Offset(0, 3),
                           ),
@@ -401,8 +440,8 @@ class _CookingModeScreenState extends State<CookingModeScreen> {
                               Container(
                                 width: 34,
                                 height: 34,
-                                decoration: const BoxDecoration(
-                                  color: Color(0xFFF3EFE9),
+                                decoration: BoxDecoration(
+                                  color: isDark ? const Color(0xFF38322D) : const Color(0xFFF3EFE9),
                                   shape: BoxShape.circle,
                                 ),
                                 child: Center(
@@ -410,18 +449,18 @@ class _CookingModeScreenState extends State<CookingModeScreen> {
                                     '${_currentStepIndex + 1}',
                                     style: GoogleFonts.plusJakartaSans(
                                       fontWeight: FontWeight.bold,
-                                      color: AppColors.textPrimary,
+                                      color: isDark ? const Color(0xFFDDA743) : AppColors.textPrimary,
                                     ),
                                   ),
                                 ),
                               ),
                               const SizedBox(width: 12),
                               Text(
-                                'Instrucción',
+                                'Instrucción a seguir',
                                 style: GoogleFonts.plusJakartaSans(
                                   fontSize: 13,
                                   fontWeight: FontWeight.w600,
-                                  color: AppColors.textSecondary,
+                                  color: textSecondary,
                                 ),
                               ),
                             ],
@@ -431,23 +470,30 @@ class _CookingModeScreenState extends State<CookingModeScreen> {
                             currentInstruction,
                             style: GoogleFonts.playfairDisplay(
                               fontSize: 20,
-                              height: 1.45,
+                              height: 1.5,
                               fontWeight: FontWeight.w600,
-                              color: AppColors.textPrimary,
+                              color: textPrimary,
                             ),
                           ),
                         ],
                       ),
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 18),
 
                     // Temporizador integrado para cocinar
                     Container(
-                      padding: const EdgeInsets.all(18),
+                      padding: const EdgeInsets.all(20),
                       decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: AppColors.border),
+                        color: cardBg,
+                        borderRadius: BorderRadius.circular(22),
+                        border: Border.all(color: borderColor),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.02),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
                       ),
                       child: Column(
                         children: [
@@ -456,24 +502,37 @@ class _CookingModeScreenState extends State<CookingModeScreen> {
                             children: [
                               Row(
                                 children: [
-                                  const Icon(Icons.timer_outlined, size: 20, color: AppColors.orangeAccent),
+                                  const Icon(
+                                    Icons.timer_outlined,
+                                    size: 20,
+                                    color: AppColors.orangeAccent,
+                                  ),
                                   const SizedBox(width: 8),
                                   Text(
                                     'Temporizador de Cocina',
                                     style: GoogleFonts.plusJakartaSans(
                                       fontSize: 14,
                                       fontWeight: FontWeight.w700,
-                                      color: AppColors.textPrimary,
+                                      color: textPrimary,
                                     ),
                                   ),
                                 ],
                               ),
-                              Text(
-                                _isTimerRunning ? 'En marcha' : 'Pausado',
-                                style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w600,
-                                  color: _isTimerRunning ? Colors.green : AppColors.textMuted,
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                decoration: BoxDecoration(
+                                  color: _isTimerRunning
+                                      ? Colors.green.withValues(alpha: 0.15)
+                                      : (isDark ? const Color(0xFF38322D) : const Color(0xFFF3EFE9)),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Text(
+                                  _isTimerRunning ? '● En marcha' : 'Pausado',
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600,
+                                    color: _isTimerRunning ? Colors.green : textMuted,
+                                  ),
                                 ),
                               ),
                             ],
@@ -484,13 +543,15 @@ class _CookingModeScreenState extends State<CookingModeScreen> {
                           Text(
                             _formatTimerTime(_remainingSeconds),
                             style: GoogleFonts.plusJakartaSans(
-                              fontSize: 42,
+                              fontSize: 44,
                               fontWeight: FontWeight.w800,
                               letterSpacing: 2.0,
-                              color: _isTimerRunning ? AppColors.orangeAccent : AppColors.textPrimary,
+                              color: _isTimerRunning
+                                  ? AppColors.orangeAccent
+                                  : textPrimary,
                             ),
                           ),
-                          const SizedBox(height: 12),
+                          const SizedBox(height: 14),
 
                           // Botones de control del temporizador
                           Row(
@@ -499,17 +560,26 @@ class _CookingModeScreenState extends State<CookingModeScreen> {
                               IconButton.filledTonal(
                                 onPressed: _resetTimer,
                                 icon: const Icon(Icons.replay_rounded),
-                                tooltip: 'Reiniciar',
+                                tooltip: 'Reiniciar temporizador',
+                                style: IconButton.styleFrom(
+                                  backgroundColor: isDark ? const Color(0xFF38322D) : const Color(0xFFF3EFE9),
+                                  foregroundColor: textPrimary,
+                                ),
                               ),
                               const SizedBox(width: 16),
                               ElevatedButton.icon(
                                 onPressed: _isTimerRunning ? _pauseTimer : _startTimer,
                                 icon: Icon(_isTimerRunning ? Icons.pause_rounded : Icons.play_arrow_rounded),
-                                label: Text(_isTimerRunning ? 'Pausar' : 'Iniciar'),
+                                label: Text(
+                                  _isTimerRunning ? 'Pausar' : 'Iniciar',
+                                  style: const TextStyle(fontWeight: FontWeight.bold),
+                                ),
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: AppColors.darkButton,
-                                  foregroundColor: Colors.white,
-                                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                                  backgroundColor: _isTimerRunning
+                                      ? AppColors.orangeAccent
+                                      : accentColor,
+                                  foregroundColor: (_isTimerRunning || !isDark) ? Colors.white : const Color(0xFF1E1A17),
+                                  padding: const EdgeInsets.symmetric(horizontal: 26, vertical: 12),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(14),
                                   ),
@@ -517,18 +587,35 @@ class _CookingModeScreenState extends State<CookingModeScreen> {
                               ),
                             ],
                           ),
-                          const SizedBox(height: 12),
+                          const SizedBox(height: 14),
 
-                          // Ajustes rápidos de minutos (+1, +3, +5, +10)
+                          // Ajustes rápidos de minutos (+1, +3, +5, +10, +15)
                           Wrap(
                             spacing: 8,
+                            runSpacing: 6,
+                            alignment: WrapAlignment.center,
                             children: [1, 3, 5, 10, 15].map((mins) {
-                              return ActionChip(
-                                label: Text('+$mins min'),
-                                labelStyle: const TextStyle(fontSize: 11),
-                                onPressed: () {
+                              return GestureDetector(
+                                onTap: () {
+                                  HapticFeedback.selectionClick();
                                   _setTimerMinutes(mins);
                                 },
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                  decoration: BoxDecoration(
+                                    color: isDark ? const Color(0xFF2C2825) : const Color(0xFFF8F6F2),
+                                    borderRadius: BorderRadius.circular(10),
+                                    border: Border.all(color: borderColor),
+                                  ),
+                                  child: Text(
+                                    '+$mins min',
+                                    style: GoogleFonts.plusJakartaSans(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w600,
+                                      color: textSecondary,
+                                    ),
+                                  ),
+                                ),
                               );
                             }).toList(),
                           ),
@@ -543,9 +630,9 @@ class _CookingModeScreenState extends State<CookingModeScreen> {
             // Controles de navegación inferior (Paso anterior / Siguiente / Finalizar)
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                border: Border(top: BorderSide(color: AppColors.borderLight)),
+              decoration: BoxDecoration(
+                color: cardBg,
+                border: Border(top: BorderSide(color: borderColor)),
               ),
               child: Row(
                 children: [
@@ -560,14 +647,14 @@ class _CookingModeScreenState extends State<CookingModeScreen> {
                           });
                         },
                         style: OutlinedButton.styleFrom(
-                          foregroundColor: AppColors.textPrimary,
-                          side: const BorderSide(color: AppColors.border),
+                          foregroundColor: textPrimary,
+                          side: BorderSide(color: borderColor),
                           padding: const EdgeInsets.symmetric(vertical: 14),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(16),
                           ),
                         ),
-                        child: const Text('Anterior'),
+                        child: const Text('← Anterior'),
                       ),
                     ),
                   if (_currentStepIndex > 0) const SizedBox(width: 12),
@@ -585,8 +672,8 @@ class _CookingModeScreenState extends State<CookingModeScreen> {
                         }
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.darkButton,
-                        foregroundColor: Colors.white,
+                        backgroundColor: accentColor,
+                        foregroundColor: isDark ? const Color(0xFF1E1A17) : Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16),

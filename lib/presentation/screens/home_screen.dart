@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../domain/entities/recipe.dart';
@@ -22,6 +23,12 @@ class HomeScreen extends StatelessWidget {
     final userProvider = context.watch<UserProvider>();
     final recipeProvider = context.watch<RecipeProvider>();
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cardBg = isDark ? AppColors.cardDark : Colors.white;
+    final borderColor = isDark ? AppColors.borderDark : AppColors.border;
+    final textColor = isDark ? AppColors.textPrimaryDark : AppColors.textPrimary;
+    final textMutedColor = isDark ? AppColors.textSecondaryDark : AppColors.textSecondary;
+
     final user = userProvider.user;
     final userName = user?.name.split(' ').first ?? 'Matias';
     final userInitials = user?.initials ?? 'MT';
@@ -31,17 +38,17 @@ class HomeScreen extends StatelessWidget {
     final categoryCounts = recipeProvider.categoryCounts;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: isDark ? AppColors.backgroundDark : AppColors.background,
       body: SafeArea(
         child: RefreshIndicator(
           onRefresh: () => recipeProvider.loadRecipes(),
-          color: AppColors.darkButton,
+          color: isDark ? const Color(0xFFDDA743) : AppColors.darkButton,
           child: SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Top Culina App Bar (Protected from overflow)
+                // Barra superior de navegación y perfil
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
                   child: Row(
@@ -53,18 +60,18 @@ class HomeScreen extends StatelessWidget {
                             Text(
                               'Culina',
                               style: GoogleFonts.playfairDisplay(
-                                fontSize: 24,
+                                fontSize: 26,
                                 fontWeight: FontWeight.w700,
-                                color: AppColors.textPrimary,
+                                color: textColor,
                               ),
                             ),
                             Text(
-                              'Recetas artesanales para Android',
+                              'Cocina artesanal paso a paso',
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: GoogleFonts.plusJakartaSans(
-                                fontSize: 11,
-                                color: AppColors.textSecondary,
+                                fontSize: 11.5,
+                                color: textMutedColor,
                               ),
                             ),
                           ],
@@ -76,19 +83,24 @@ class HomeScreen extends StatelessWidget {
                         children: [
                           IconButton(
                             icon: const Icon(Icons.search_rounded, size: 22),
-                            color: AppColors.textPrimary,
+                            color: textColor,
+                            tooltip: 'Buscar recetas',
                             visualDensity: VisualDensity.compact,
                             onPressed: () => onNavigateTab(1),
                           ),
+                          const SizedBox(width: 4),
                           GestureDetector(
                             onTap: () => onNavigateTab(4),
                             child: Container(
-                              width: 34,
-                              height: 34,
+                              width: 36,
+                              height: 36,
                               decoration: BoxDecoration(
-                                color: const Color(0xFFFEF3C7),
+                                color: isDark ? const Color(0xFF332A15) : const Color(0xFFFEF3C7),
                                 shape: BoxShape.circle,
-                                border: Border.all(color: const Color(0xFFFDE68A)),
+                                border: Border.all(
+                                  color: isDark ? const Color(0xFF785E28) : const Color(0xFFFDE68A),
+                                  width: 1.5,
+                                ),
                               ),
                               child: Center(
                                 child: Text(
@@ -96,7 +108,7 @@ class HomeScreen extends StatelessWidget {
                                   style: GoogleFonts.plusJakartaSans(
                                     fontSize: 12,
                                     fontWeight: FontWeight.w700,
-                                    color: const Color(0xFF92400E),
+                                    color: isDark ? const Color(0xFFFDE68A) : const Color(0xFF92400E),
                                   ),
                                 ),
                               ),
@@ -108,105 +120,99 @@ class HomeScreen extends StatelessWidget {
                   ),
                 ),
 
-                // Greeting & Search Banner Card (Protected from overflow)
+                // Tarjeta de Saludo e Invitación a Buscar
                 Container(
                   margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(18),
                   decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(22),
-                    border: Border.all(color: AppColors.border),
+                    color: cardBg,
+                    borderRadius: BorderRadius.circular(24),
+                    border: Border.all(color: borderColor),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.02),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
+                        color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.025),
+                        blurRadius: 10,
+                        offset: const Offset(0, 3),
                       ),
                     ],
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'BIENVENIDO DE NUEVO',
-                                  style: GoogleFonts.plusJakartaSans(
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w700,
-                                    letterSpacing: 1.1,
-                                    color: AppColors.textMuted,
-                                  ),
-                                ),
-                                const SizedBox(height: 3),
-                                Text(
-                                  '¡Hola, $userName!',
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: GoogleFonts.playfairDisplay(
-                                    fontSize: 22,
-                                    fontWeight: FontWeight.w700,
-                                    color: AppColors.textPrimary,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Container(
-                            width: 44,
-                            height: 44,
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFFEF3C7),
-                              shape: BoxShape.circle,
-                              border: Border.all(color: const Color(0xFFFDE68A), width: 1.5),
-                            ),
-                            child: Center(
-                              child: Text(
-                                userInitials,
-                                style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w700,
-                                  color: const Color(0xFF92400E),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
+                      Text(
+                        '¡Hola, $userName! 👋',
+                        style: GoogleFonts.playfairDisplay(
+                          fontSize: 22,
+                          fontWeight: FontWeight.w700,
+                          color: textColor,
+                        ),
+                      ),
+                      const SizedBox(height: 3),
+                      Text(
+                        '¿Qué te gustaría preparar hoy?',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 13,
+                          color: textMutedColor,
+                        ),
                       ),
                       const SizedBox(height: 14),
 
-                      // Search input
+                      // Buscador visual interactivo con atajo rápido
                       GestureDetector(
-                        onTap: () => onNavigateTab(1),
+                        onTap: () {
+                          HapticFeedback.selectionClick();
+                          onNavigateTab(1);
+                        },
                         child: Container(
                           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFFAF9F6),
-                            borderRadius: BorderRadius.circular(14),
-                            border: Border.all(color: AppColors.border),
+                            color: isDark ? const Color(0xFF282522) : const Color(0xFFFAF9F6),
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(color: borderColor),
                           ),
                           child: Row(
                             children: [
                               const Icon(
                                 Icons.search_rounded,
-                                size: 18,
-                                color: AppColors.textSecondary,
+                                size: 19,
+                                color: AppColors.orangeAccent,
                               ),
                               const SizedBox(width: 10),
                               Expanded(
                                 child: Text(
-                                  'Buscar por receta, ingrediente o pasta...',
+                                  'Buscar pastas, ensaladas, postres...',
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                   style: GoogleFonts.plusJakartaSans(
                                     fontSize: 13,
-                                    color: AppColors.textMuted,
+                                    color: isDark ? Colors.white54 : AppColors.textMuted,
                                   ),
+                                ),
+                              ),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                decoration: BoxDecoration(
+                                  color: isDark ? const Color(0xFF332A15) : const Color(0xFFF3EFEA),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      Icons.tune_rounded,
+                                      size: 13,
+                                      color: isDark ? const Color(0xFFFDE68A) : AppColors.textSecondary,
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      'Filtros',
+                                      style: GoogleFonts.plusJakartaSans(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w600,
+                                        color: isDark ? const Color(0xFFFDE68A) : AppColors.textSecondary,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
                             ],
@@ -216,21 +222,21 @@ class HomeScreen extends StatelessWidget {
                     ],
                   ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 18),
 
-                // CATEGORÍAS Section
+                // Sección de Categorías
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 18),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'CATEGORÍAS',
+                        'EXPLORAR CATEGORÍAS',
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 11,
                           fontWeight: FontWeight.w700,
                           letterSpacing: 1.1,
-                          color: AppColors.textMuted,
+                          color: isDark ? const Color(0xFFDDA743) : AppColors.textMuted,
                         ),
                       ),
                       GestureDetector(
@@ -242,18 +248,18 @@ class HomeScreen extends StatelessWidget {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Text(
-                              'Ver todas',
+                              'Ver catálogo',
                               style: GoogleFonts.plusJakartaSans(
                                 fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.textSecondary,
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.orangeAccent,
                               ),
                             ),
-                            const SizedBox(width: 4),
+                            const SizedBox(width: 3),
                             const Icon(
                               Icons.arrow_forward_rounded,
                               size: 13,
-                              color: AppColors.textSecondary,
+                              color: AppColors.orangeAccent,
                             ),
                           ],
                         ),
@@ -263,17 +269,17 @@ class HomeScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 10),
 
-                // Horizontal list of categories
+                // Carrusel horizontal de categorías
                 SizedBox(
-                  height: 42,
+                  height: 44,
                   child: ListView(
                     scrollDirection: Axis.horizontal,
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     children: [
                       CategoryChipItem(
                         label: 'Desayunos',
-                        icon: '🥗',
-                        count: categoryCounts['Desayunos'] ?? 1,
+                        icon: '🥐',
+                        count: categoryCounts['Desayunos'] ?? 0,
                         isSelected: false,
                         onTap: () {
                           recipeProvider.setSelectedCategory('Desayunos');
@@ -283,7 +289,7 @@ class HomeScreen extends StatelessWidget {
                       CategoryChipItem(
                         label: 'Pastas',
                         icon: '🍝',
-                        count: categoryCounts['Pastas'] ?? 1,
+                        count: categoryCounts['Pastas'] ?? 0,
                         isSelected: false,
                         onTap: () {
                           recipeProvider.setSelectedCategory('Pastas');
@@ -293,7 +299,7 @@ class HomeScreen extends StatelessWidget {
                       CategoryChipItem(
                         label: 'Almuerzos',
                         icon: '🍲',
-                        count: categoryCounts['Almuerzos'] ?? 1,
+                        count: categoryCounts['Almuerzos'] ?? 0,
                         isSelected: false,
                         onTap: () {
                           recipeProvider.setSelectedCategory('Almuerzos');
@@ -303,7 +309,7 @@ class HomeScreen extends StatelessWidget {
                       CategoryChipItem(
                         label: 'Ensaladas',
                         icon: '🥗',
-                        count: categoryCounts['Ensaladas'] ?? 1,
+                        count: categoryCounts['Ensaladas'] ?? 0,
                         isSelected: false,
                         onTap: () {
                           recipeProvider.setSelectedCategory('Ensaladas');
@@ -313,19 +319,29 @@ class HomeScreen extends StatelessWidget {
                       CategoryChipItem(
                         label: 'Postres',
                         icon: '🍰',
-                        count: categoryCounts['Postres'] ?? 1,
+                        count: categoryCounts['Postres'] ?? 0,
                         isSelected: false,
                         onTap: () {
                           recipeProvider.setSelectedCategory('Postres');
                           onNavigateTab(1);
                         },
                       ),
+                      CategoryChipItem(
+                        label: 'Rápidas',
+                        icon: '⚡',
+                        count: quickRecipes.length,
+                        isSelected: false,
+                        onTap: () {
+                          recipeProvider.setSelectedCategory('Rápidas');
+                          onNavigateTab(1);
+                        },
+                      ),
                     ],
                   ),
                 ),
-                const SizedBox(height: 14),
+                const SizedBox(height: 16),
 
-                // Destacada de hoy
+                // Receta recomendada del día
                 if (featured != null)
                   FeaturedRecipeCard(
                     recipe: featured,
@@ -351,9 +367,9 @@ class HomeScreen extends StatelessWidget {
                     },
                   ),
 
-                const SizedBox(height: 18),
+                const SizedBox(height: 20),
 
-                // Listas en menos de 25 minutos Section (Protected from overflow)
+                // Sección: Listas en menos de 25 minutos
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 18),
                   child: Row(
@@ -362,16 +378,16 @@ class HomeScreen extends StatelessWidget {
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Text('⚡ ', style: TextStyle(fontSize: 13)),
+                            const Text('⚡ ', style: TextStyle(fontSize: 14)),
                             Flexible(
                               child: Text(
-                                'Listas en menos de 25 minutos',
+                                'Listas en menos de 25 min',
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 13,
+                                style: GoogleFonts.playfairDisplay(
+                                  fontSize: 17,
                                   fontWeight: FontWeight.w700,
-                                  color: AppColors.textPrimary,
+                                  color: textColor,
                                 ),
                               ),
                             ),
@@ -385,11 +401,11 @@ class HomeScreen extends StatelessWidget {
                           onNavigateTab(1);
                         },
                         child: Text(
-                          'Ver más',
+                          'Ver todas',
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.textSecondary,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.orangeAccent,
                           ),
                         ),
                       ),
@@ -398,16 +414,16 @@ class HomeScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 10),
 
-                // Quick recipes horizontal cards
+                // Carrusel horizontal de recetas rápidas
                 SizedBox(
-                  height: 175,
+                  height: 185,
                   child: ListView.builder(
                     scrollDirection: Axis.horizontal,
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     itemCount: quickRecipes.length,
                     itemBuilder: (context, index) {
                       final recipe = quickRecipes[index];
-                      return _buildQuickRecipeCard(context, recipe, recipeProvider);
+                      return _buildQuickRecipeCard(context, recipe, recipeProvider, isDark, cardBg, borderColor, textColor, textMutedColor);
                     },
                   ),
                 ),
@@ -424,6 +440,11 @@ class HomeScreen extends StatelessWidget {
     BuildContext context,
     Recipe recipe,
     RecipeProvider provider,
+    bool isDark,
+    Color cardBg,
+    Color borderColor,
+    Color textColor,
+    Color textMutedColor,
   ) {
     return GestureDetector(
       onTap: () {
@@ -434,16 +455,16 @@ class HomeScreen extends StatelessWidget {
         );
       },
       child: Container(
-        width: 170,
+        width: 175,
         margin: const EdgeInsets.only(right: 12),
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: AppColors.border),
+          color: cardBg,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: borderColor),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.02),
+              color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.025),
               blurRadius: 6,
               offset: const Offset(0, 2),
             ),
@@ -453,53 +474,64 @@ class HomeScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
-              height: 70,
+              height: 75,
               width: double.infinity,
               decoration: BoxDecoration(
-                color: const Color(0xFFF7F5EE),
-                borderRadius: BorderRadius.circular(12),
+                color: isDark ? const Color(0xFF282522) : const Color(0xFFF7F5EE),
+                borderRadius: BorderRadius.circular(14),
               ),
               child: Center(
                 child: Text(
                   recipe.icon,
-                  style: const TextStyle(fontSize: 32),
+                  style: const TextStyle(fontSize: 34),
                 ),
               ),
             ),
             const SizedBox(height: 8),
+
             Text(
               recipe.title,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: GoogleFonts.playfairDisplay(
-                fontSize: 13,
+                fontSize: 14,
                 fontWeight: FontWeight.w700,
-                color: AppColors.textPrimary,
+                color: textColor,
               ),
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 6),
+
             Row(
               children: [
-                const Icon(Icons.access_time_rounded, size: 12, color: AppColors.textSecondary),
-                const SizedBox(width: 4),
-                Text(
-                  '${recipe.totalTime} min',
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 11,
-                    color: AppColors.textSecondary,
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: isDark ? const Color(0xFF332A15) : const Color(0xFFFEF3C7),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.timer_outlined, size: 10, color: Color(0xFF92400E)),
+                      const SizedBox(width: 3),
+                      Text(
+                        '${recipe.totalTime}m',
+                        style: const TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w700,
+                          color: Color(0xFF92400E),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 const Spacer(),
-                Flexible(
-                  child: Text(
-                    recipe.difficulty,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w500,
-                      color: AppColors.textSecondary,
-                    ),
+                Text(
+                  recipe.difficulty,
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: textMutedColor,
                   ),
                 ),
               ],
