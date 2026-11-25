@@ -16,6 +16,7 @@ class RecipeRepositoryImpl implements RecipeRepository {
 
   Recipe _sanitizeRecipe(Recipe r) {
     if (r.isUserCreated) return r;
+    final curated = CulinaryTranslator.getCuratedSteps(r.title);
     return r.copyWith(
       title: CulinaryTranslator.translateTitle(r.title),
       ingredients: r.ingredients.map((ing) {
@@ -24,7 +25,7 @@ class RecipeRepositoryImpl implements RecipeRepository {
           unit: CulinaryTranslator.translateUnit(ing.unit),
         );
       }).toList(),
-      steps: r.steps.map((s) => CulinaryTranslator.translateInstructionStep(s)).toList(),
+      steps: curated ?? r.steps.map((s) => CulinaryTranslator.translateInstructionStep(s)).toList(),
     );
   }
 

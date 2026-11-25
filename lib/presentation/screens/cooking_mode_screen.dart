@@ -322,7 +322,8 @@ class _CookingModeScreenState extends State<CookingModeScreen> {
     final themeProvider = context.watch<ThemeProvider>();
     final isDark = themeProvider.isDarkMode;
 
-    final steps = widget.recipe.steps;
+    final curated = CulinaryTranslator.getCuratedSteps(widget.recipe.title);
+    final steps = curated ?? widget.recipe.steps;
     final totalSteps = steps.isNotEmpty ? steps.length : 1;
     final progress = (totalSteps > 0) ? (_currentStepIndex + 1) / totalSteps : 1.0;
     final currentInstruction = steps.isNotEmpty

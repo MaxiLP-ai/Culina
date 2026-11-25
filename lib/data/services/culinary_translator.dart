@@ -1175,6 +1175,132 @@ class CulinaryTranslator {
     return unit.isNotEmpty ? unit : 'al gusto';
   }
 
+  // Recetario curado con pasos artesanales en español para platos destacados
+  static final Map<String, List<String>> _curatedRecipeSteps = {
+    // Merluza a la Plancha con Caldo de Porotos y Chorizo (Hake)
+    'merluza a la plancha con caldo de porotos y chorizo': [
+      'Escurre los porotos y colócalos en una olla grande con 2 litros de agua. Cocina a fuego lento junto con los dientes de ajo enteros, las hojas de laurel y el tomillo durante 30 minutos hasta que estén tiernos. Retira del fuego y reserva.',
+      'Mientras tanto, calienta 2 cucharadas de aceite en una sartén. Dora las rebanadas de pan junto con el diente de ajo restante. Cuando esté bien crujiente y dorado, retira y escurre sobre papel absorbente. En la misma sartén sofríe el chorizo hasta que esté crujiente, retira y reserva tibio junto al pan.',
+      'Añade otras 2 cucharadas de aceite y la cebolla picada a la sartén; sofríe durante 5 minutos hasta que esté tierna y transparente. Incorpora el pimentón dulce. Escurre los porotos y agrégalos a las cebollas junto con el caldo de pollo y 2 cucharaditas de sal. Cocina a fuego lento de 5 a 10 minutos, incorpora el perejil fresco picado y reserva caliente.',
+      'Sazona los filetes de merluza con sal y pimienta, y calienta las 2 cucharadas restantes de aceite en la sartén. Coloca la merluza con la piel hacia abajo y cocina a fuego medio-alto de 3 a 5 minutos hasta que la piel quede crujiente. Da vuelta los filetes y cocina otros 3 a 5 minutos hasta que estén en su punto. Sirve el guiso de porotos en platos hondos, corona con la merluza y finaliza con el pan frito, el chorizo y una ramita de tomillo fresco.',
+    ],
+    'pan-fried hake, white bean & chorizo broth': [
+      'Escurre los porotos y colócalos en una olla grande con 2 litros de agua. Cocina a fuego lento junto con los dientes de ajo enteros, las hojas de laurel y el tomillo durante 30 minutos hasta que estén tiernos. Retira del fuego y reserva.',
+      'Mientras tanto, calienta 2 cucharadas de aceite en una sartén. Dora las rebanadas de pan junto con el diente de ajo restante. Cuando esté bien crujiente y dorado, retira y escurre sobre papel absorbente. En la misma sartén sofríe el chorizo hasta que esté crujiente, retira y reserva tibio junto al pan.',
+      'Añade otras 2 cucharadas de aceite y la cebolla picada a la sartén; sofríe durante 5 minutos hasta que esté tierna y transparente. Incorpora el pimentón dulce. Escurre los porotos y agrégalos a las cebollas junto con el caldo de pollo y 2 cucharaditas de sal. Cocina a fuego lento de 5 a 10 minutos, incorpora el perejil fresco picado y reserva caliente.',
+      'Sazona los filetes de merluza con sal y pimienta, y calienta las 2 cucharadas restantes de aceite en la sartén. Coloca la merluza con la piel hacia abajo y cocina a fuego medio-alto de 3 a 5 minutos hasta que la piel quede crujiente. Da vuelta los filetes y cocina otros 3 a 5 minutos hasta que estén en su punto. Sirve el guiso de porotos en platos hondos, corona con la merluza y finaliza con el pan frito, el chorizo y una ramita de tomillo fresco.',
+    ],
+    // Ensalada de Pasta Mediterránea
+    'ensalada de pasta mediterránea': [
+      'Hierve abundante agua con sal en una olla grande y cocina la pasta durante 10 minutos hasta que esté al dente.',
+      'Corta los tomates cherry en mitades, pica finamente las aceitunas y corta el queso en cubos pequeños.',
+      'Escurre la pasta, déjala enfriar y mézclala homogéneamente en un bol grande con los tomates, aceitunas, queso, aceite de oliva extra virgen y hojas de albahaca fresca.',
+    ],
+    'mediterranean pasta salad': [
+      'Hierve abundante agua con sal en una olla grande y cocina la pasta durante 10 minutos hasta que esté al dente.',
+      'Corta los tomates cherry en mitades, pica finamente las aceitunas y corta el queso en cubos pequeños.',
+      'Escurre la pasta, déjala enfriar y mézclala homogéneamente en un bol grande con los tomates, aceitunas, queso, aceite de oliva extra virgen y hojas de albahaca fresca.',
+    ],
+    // Espaguetis a la Boloñesa Tradicional
+    'espaguetis a la boloñesa tradicional': [
+      'Pica finamente la cebolla, el apio, la zanahoria y los dientes de ajo.',
+      'En una cacerola amplia, calienta el aceite de oliva y sofríe los vegetales picados a fuego medio durante 8 minutos hasta que estén tiernos.',
+      'Incorpora la carne picada de res y cocina revolviendo constantemente hasta dorar por completo.',
+      'Añade los tomates triturados, la pasta de tomate concentrada y el caldo. Reduce el fuego al mínimo y cocina tapado a fuego lento durante 45 minutos.',
+      'Cocina los espaguetis en abundante agua hirviendo con sal hasta que estén al dente, escurre y sirve con la salsa boloñesa caliente y queso parmesano rallado.',
+    ],
+    'spaghetti bolognese': [
+      'Pica finamente la cebolla, el apio, la zanahoria y los dientes de ajo.',
+      'En una cacerola amplia, calienta el aceite de oliva y sofríe los vegetales picados a fuego medio durante 8 minutos hasta que estén tiernos.',
+      'Incorpora la carne picada de res y cocina revolviendo constantemente hasta dorar por completo.',
+      'Añade los tomates triturados, la pasta de tomate concentrada y el caldo. Reduce el fuego al mínimo y cocina tapado a fuego lento durante 45 minutos.',
+      'Cocina los espaguetis en abundante agua hirviendo con sal hasta que estén al dente, escurre y sirve con la salsa boloñesa caliente y queso parmesano rallado.',
+    ],
+    // Lasaña Clásica Artesanal
+    'lasaña clásica artesanal': [
+      'Prepara la salsa boloñesa sofriendo cebolla, ajo y carne picada, cocinando a fuego lento con puré de tomates y hierbas aromáticas.',
+      'Prepara la bechamel derritiendo mantequilla, incorporando harina e integrando leche tibia poco a poco hasta espesar suavemente.',
+      'En una fuente para horno, alterna capas de láminas de lasaña, salsa boloñesa, bechamel y queso mozzarella rallado.',
+      'Finaliza con abundante queso parmesano por encima y hornea a 180°C durante 30 a 35 minutos hasta dorar y gratinar.',
+    ],
+    // Penne all’Arrabbiata Picante
+    'penne all’arrabbiata picante': [
+      'Hierve abundante agua con sal y cocina los penne rigate hasta que estén al dente.',
+      'En una sartén calienta abundante aceite de oliva virgen extra y sofríe los ajos laminados y las guindillas picantes sin quemar.',
+      'Incorpora los tomates triturados maduros y una pizca de sal; cocina a fuego medio durante 15 minutos hasta reducir la salsa.',
+      'Vierte la pasta escurrida directamente en la sartén con la salsa caliente, saltea durante 1 minuto, decora con perejil fresco y sirve.',
+    ],
+    // Salmón Horneado con Hinojo y Tomates
+    'salmón horneado con hinojo y tomates': [
+      'Precalienta el horno a 190°C y forra una bandeja para hornear con papel manteca.',
+      'Corta el bulbo de hinojo en láminas finas y los tomates en mitades, disponiéndolos en la bandeja con aceite de oliva, sal y pimienta.',
+      'Coloca los filetes de salmón sobre la cama de vegetales, rocía con jugo de limón y aceite de oliva virgen extra.',
+      'Hornea durante 15 a 18 minutos hasta que el salmón esté tierno y jugoso.',
+    ],
+    // Panqueques Dorados con Miel y Avena
+    'panqueques dorados con miel y avena': [
+      'En un bol mezcla la harina, polvo de hornear, una pizca de sal y azúcar.',
+      'En otro recipiente bate los huevos con la leche y la mantequilla derretida.',
+      'Une ambas mezclas con movimientos suaves hasta obtener una masa homogénea sin grumos.',
+      'Calienta una sartén antiadherente con una pizca de mantequilla y vierte un cucharón de masa.',
+      'Cocina a fuego medio hasta que aparezcan burbujas en la superficie (2 minutos), da vuelta con espátula y dora 1 minuto más del otro lado.',
+      'Sirve calientes apilados y coronados con miel pura o frutas frescas.',
+    ],
+    // Fajitas de Pollo con Pimientos Asados
+    'fajitas de pollo con pimientos asados': [
+      'Corta las pechugas de pollo en tiras y marina con comino, pimentón dulce, jugo de lima y aceite de oliva.',
+      'Corta los pimientos tricolor y la cebolla en juliana fina.',
+      'En una sartén bien caliente con aceite, dora el pollo a fuego vivo durante 5 minutos y retira.',
+      'En la misma sartén saltea los pimientos y la cebolla hasta que estén dorados pero crujientes.',
+      'Reincorpora el pollo para unificar sabores, sazona con sal y sirve en tortillas tibias con guacamole fresco.',
+    ],
+    // Solomillo de Res Wellington en Hojaldre
+    'solomillo de res wellington en hojaldre': [
+      'Sella el lomo de res a fuego vivo en una sartén muy caliente por todos sus lados y deja enfriar por completo.',
+      'Procesa los champiñones con ajo y chalota, y cocínalos en sartén seca hasta evaporar toda la humedad.',
+      'Pinta la carne con mostaza de Dijon y envuelve con jamón curado y la pasta de champiñones en papel film; refrigera 20 minutos.',
+      'Estira la masa de hojaldre, envuelve la carne sellando los bordes, pincela con yema de huevo batida y realiza cortes decorativos.',
+      'Hornea a 200°C durante 25 a 30 minutos hasta que el hojaldre esté dorado y crujiente. Deja reposar 10 minutos antes de cortar.',
+    ],
+  };
+
+  static List<String>? getCuratedSteps(String title) {
+    final lower = title.trim().toLowerCase();
+    if (_curatedRecipeSteps.containsKey(lower)) {
+      return _curatedRecipeSteps[lower];
+    }
+    for (final entry in _curatedRecipeSteps.entries) {
+      if (lower.contains(entry.key) || entry.key.contains(lower)) {
+        return entry.value;
+      }
+    }
+    if (lower.contains('merluza') || lower.contains('hake')) {
+      return _curatedRecipeSteps['merluza a la plancha con caldo de porotos y chorizo'];
+    }
+    if (lower.contains('boloñesa') || lower.contains('bolognese')) {
+      return _curatedRecipeSteps['espaguetis a la boloñesa tradicional'];
+    }
+    if (lower.contains('lasaña') || lower.contains('lasagna') || lower.contains('lasagne')) {
+      return _curatedRecipeSteps['lasaña clásica artesanal'];
+    }
+    if (lower.contains('arrabiata') || lower.contains('arrabbiata')) {
+      return _curatedRecipeSteps['penne all’arrabbiata picante'];
+    }
+    if (lower.contains('salmón') || lower.contains('salmon')) {
+      return _curatedRecipeSteps['salmón horneado con hinojo y tomates'];
+    }
+    if (lower.contains('panqueque') || lower.contains('pancake')) {
+      return _curatedRecipeSteps['panqueques dorados con miel y avena'];
+    }
+    if (lower.contains('fajita')) {
+      return _curatedRecipeSteps['fajitas de pollo con pimientos asados'];
+    }
+    if (lower.contains('wellington')) {
+      return _curatedRecipeSteps['solomillo de res wellington en hojaldre'];
+    }
+    return null;
+  }
+
   static String translateInstructionStep(String step) {
     var s = step.trim();
     if (s.isEmpty) return s;
@@ -1183,6 +1309,116 @@ class CulinaryTranslator {
     s = s.replaceAll(RegExp(r'^(step\s*\d+[:.-]?\s*|paso\s*\d+[:.-]?\s*)', caseSensitive: false), '').trim();
 
     final replacements = [
+      // Oraciones completas específicas de platos populares (ej. Pan-fried hake)
+      ['Drain the beans, then tip into a large pan with 2 litres of water', 'Escurre los porotos y colócalos en una olla grande con 2 litros de agua'],
+      ['Drain the beans, then tip into a large pan', 'Escurre los porotos y colócalos en una olla grande'],
+      ['Drain the beans and add to the onions with the chicken stock and 2 tsp salt', 'Escurre los porotos y agrégalos a las cebollas junto con el caldo de pollo y 2 cucharaditas de sal'],
+      ['Drain the beans and add to the onions with the chicken stock', 'Escurre los porotos y agrégalos a las cebollas junto con el caldo de pollo'],
+      ['Simmer with the whole garlic cloves, bay leaves and thyme for 30 mins or until cooked and tender', 'Cocina a fuego lento con los dientes de ajo enteros, las hojas de laurel y el tomillo durante 30 minutos hasta que estén tiernos'],
+      ['Simmer with the whole garlic cloves, bay leaves and thyme for 30 min or until cooked and tender', 'Cocina a fuego lento con los dientes de ajo enteros, las hojas de laurel y el tomillo durante 30 minutos hasta que estén tiernos'],
+      ['Simmer with the whole garlic cloves, bay leaves and thyme', 'Cocina a fuego lento con los dientes de ajo enteros, las hojas de laurel y el tomillo'],
+      ['Meanwhile, heat 2 tbsp oil in a frying pan', 'Mientras tanto, calienta 2 cucharadas de aceite en una sartén'],
+      ['Fry the bread with the remaining garlic clove', 'Dora el pan junto con el diente de ajo restante'],
+      ['When golden and crisp, scoop out and drain on kitchen paper', 'Cuando esté bien crujiente y dorado, retira y escurre sobre papel absorbente'],
+      ['Add the chorizo to the pan, fry until crisp, tip out and keep warm with the bread', 'Añade el chorizo a la sartén, sofríe hasta que esté crujiente, retira y reserva tibio junto al pan'],
+      ['Add another 2 tbsp oil and the onion to the pan, and cook for 5 mins until softened', 'Añade otras 2 cucharadas de aceite y la cebolla picada a la sartén, y sofríe durante 5 minutos hasta que esté tierna y transparente'],
+      ['Add another 2 tbsp oil and the onion to the pan, and cook for 5 min until softened', 'Añade otras 2 cucharadas de aceite y la cebolla picada a la sartén, y sofríe durante 5 minutos hasta que esté tierna y transparente'],
+      ['Stir in the paprika', 'Incorpora el pimentón dulce'],
+      ['Simmer for 5–10 mins', 'Cocina a fuego lento de 5 a 10 minutos'],
+      ['Simmer for 5–10 min', 'Cocina a fuego lento de 5 a 10 minutos'],
+      ['Simmer for 5-10 mins', 'Cocina a fuego lento de 5 a 10 minutos'],
+      ['Simmer for 5-10 min', 'Cocina a fuego lento de 5 a 10 minutos'],
+      ['Stir through the parsley and keep warm', 'Incorpora el perejil fresco picado y reserva caliente'],
+      ['Season the hake and heat the remaining 2 tbsp oil in the frying pan', 'Sazona la merluza con sal y pimienta, y calienta las 2 cucharadas restantes de aceite en la sartén'],
+      ['Place the hake, skin-side down, in the pan and cook for 3–5 mins over a medium-high heat to crisp up the skin', 'Coloca la merluza con la piel hacia abajo en la sartén y cocina de 3 a 5 minutos a fuego medio-alto hasta que la piel quede crujiente'],
+      ['Place the hake, skin-side down, in the pan and cook for 3–5 min over a medium-high heat to crisp up the skin', 'Coloca la merluza con la piel hacia abajo en la sartén y cocina de 3 a 5 minutos a fuego medio-alto hasta que la piel quede crujiente'],
+      ['Place the hake, skin-side down, in the pan and cook for 3–5 min over a mediumhigh heat to crisp up the skin', 'Coloca la merluza con la piel hacia abajo en la sartén y cocina de 3 a 5 minutos a fuego medio-alto hasta que la piel quede crujiente'],
+      ['Flip the fish over and cook for a further 3–5 mins until cooked through', 'Da vuelta los filetes y cocina otros 3 a 5 minutos hasta que estén en su punto'],
+      ['Flip the fish over and cook for a further 3–5 min until cooked through', 'Da vuelta los filetes y cocina otros 3 a 5 minutos hasta que estén en su punto'],
+      ['Spoon the white bean mix into bowls, place the hake on top and finish with the fried bread, chorizo and a little more thyme', 'Sirve el guiso de porotos en platos hondos, corona con la merluza y finaliza con el pan frito, el chorizo y una ramita de tomillo fresco'],
+
+      // Correcciones directas de Spanglish mixto
+      ['Drain los porotos, Luego tip into a large pan with 2 litres of water', 'Escurre los porotos y colócalos en una olla grande con 2 litros de agua'],
+      ['Drain the beans', 'Escurre los porotos'],
+      ['Drain los porotos', 'Escurre los porotos'],
+      ['tip into a large pan with 2 litres of water', 'colócalos en una olla grande con 2 litros de agua'],
+      ['tip into a large pan', 'colócalos en una olla grande'],
+      ['tip into', 'coloca en'],
+      ['tip out and keep warm with the bread', 'retira y reserva tibio junto al pan'],
+      ['tip out', 'retira'],
+      ['keep warm with the bread', 'mantén tibio junto al pan'],
+      ['keep warm', 'mantén caliente'],
+      ['scoop out and drain on kitchen paper', 'retira y escurre sobre papel absorbente'],
+      ['drain on kitchen paper', 'escurre sobre papel absorbente'],
+      ['scoop out', 'retira'],
+      ['kitchen paper', 'papel absorbente'],
+      ['and the remaining garlic clove', 'y el diente de ajo restante'],
+      ['remaining garlic clove', 'diente de ajo restante'],
+      ['remaining', 'restante'],
+      ['Fry the bread', 'Dora las rebanadas de pan'],
+      ['the bread', 'el pan'],
+      ['with the bread', 'junto al pan'],
+      ['fry hasta que esté crujiente', 'sofríe hasta que esté crujiente'],
+      ['fry until crisp', 'sofríe hasta que esté crujiente'],
+      ['Add another 2 tbsp oil and la cebolla to the pan', 'Añade otras 2 cucharadas de aceite y la cebolla a la sartén'],
+      ['Add another 2 tbsp oil', 'Añade otras 2 cucharadas de aceite'],
+      ['Add another', 'Añade otra(s)'],
+      ['to the pan', 'a la sartén'],
+      ['and Cocina durante', 'y cocina durante'],
+      ['hasta que se ablandeened', 'hasta que esté tierna y transparente'],
+      ['until softened', 'hasta que esté tierna y transparente'],
+      ['softened', 'esté tierna'],
+      ['Stir through el perejil fresco and keep warm', 'Incorpora el perejil fresco picado y reserva caliente'],
+      ['Stir through el perejil fresco', 'Incorpora el perejil fresco picado'],
+      ['Stir through the parsley', 'Incorpora el perejil fresco picado'],
+      ['Stir through', 'Incorpora'],
+      ['and 2 tsp sal', 'y 2 cucharaditas de sal'],
+      ['2 tsp sal', '2 cucharaditas de sal'],
+      ['2 tsp salt', '2 cucharaditas de sal'],
+      ['2 tbsp oil', '2 cucharadas de aceite'],
+      ['with the caldo de pollo', 'con el caldo de pollo'],
+      ['with the chicken stock', 'con el caldo de pollo'],
+      ['Season la merluza and heat the remaining 2 tbsp oil in the frying pan', 'Sazona la merluza con sal y calienta las 2 cucharadas restantes de aceite en la sartén'],
+      ['Season la merluza', 'Sazona los filetes de merluza con sal'],
+      ['Season the hake', 'Sazona los filetes de merluza con sal'],
+      ['heat the remaining 2 tbsp oil in the frying pan', 'calienta las 2 cucharadas restantes de aceite en la sartén'],
+      ['heat the remaining 2 tbsp oil', 'calienta las 2 cucharadas restantes de aceite'],
+      ['Coloca el/la hake, con la piel hacia abajo, en la sartén and Cocina durante', 'Coloca la merluza con la piel hacia abajo en la sartén y cocina durante'],
+      ['Coloca el/la hake on top and finish with the fried bread, chorizo and a little more thyme', 'corona con los filetes de merluza y finaliza con el pan frito, el chorizo y una ramita de tomillo fresco'],
+      ['Coloca el/la hake on top', 'corona con la merluza'],
+      ['Coloca el/la hake', 'Coloca los filetes de merluza'],
+      ['place the hake on top', 'corona con los filetes de merluza'],
+      ['place the hake', 'coloca los filetes de merluza'],
+      ['over a mediumhigh heat to crisp up the skin', 'a fuego medio-alto para que la piel quede crujiente'],
+      ['over a medium-high heat to crisp up the skin', 'a fuego medio-alto para que la piel quede crujiente'],
+      ['over a mediumhigh heat', 'a fuego medio-alto'],
+      ['over a medium-high heat', 'a fuego medio-alto'],
+      ['to crisp up the skin', 'hasta que la piel quede crujiente'],
+      ['Flip el pescado over and Cocina durante a further 3–5 min hasta que esté en su punto de cocción', 'Da vuelta los filetes y cocina otros 3 a 5 minutos hasta que estén en su punto'],
+      ['Flip el pescado over and Cocina durante a further', 'Da vuelta los filetes de pescado y cocina otros'],
+      ['Flip el pescado over', 'Da vuelta los filetes de pescado'],
+      ['Flip the fish over', 'Da vuelta los filetes de pescado'],
+      ['a further 3–5 min', 'otros 3 a 5 minutos'],
+      ['a further 3-5 min', 'otros 3 a 5 minutos'],
+      ['a further', 'otros'],
+      ['Spoon the white bean mix into bowls', 'Sirve el guiso de porotos en platos hondos'],
+      ['the white bean mix', 'el guiso de porotos blancos'],
+      ['finish with the fried bread, chorizo and a little more thyme', 'finaliza con el pan frito, el chorizo y una ramita de tomillo fresco'],
+      ['the fried bread', 'el pan frito'],
+      ['fried bread', 'pan frito'],
+      ['and a little more thyme', 'y una pizca de tomillo fresco'],
+      ['a little more thyme', 'un poco de tomillo fresco'],
+      ['a little more', 'un poco más de'],
+      ['the whole garlic cloves', 'los dientes de ajo enteros'],
+      ['bay leaves and thyme', 'las hojas de laurel y el tomillo'],
+      ['or until cooked and tender', 'o hasta que estén tiernos y cocidos'],
+      ['until cooked and tender', 'hasta que estén tiernos y cocidos'],
+      ['cooked and tender', 'tiernos y cocidos'],
+      ['Retira del fuego and Reserva aparte', 'Retira del fuego y reserva'],
+      ['and Reserva aparte', 'y reserva aparte'],
+      ['Reserva aparte', 'reserva'],
+      ['Retira del fuego and', 'Retira del fuego y'],
+
       // Frases culinarias completas y complejas (prioridad alta)
       ['Preheat the oven to', 'Precalienta el horno a'],
       ['Preheat the oven', 'Precalienta el horno'],

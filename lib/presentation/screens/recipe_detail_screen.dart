@@ -65,8 +65,10 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
       buffer.writeln(' • $translatedName: $amount $unitLabel'.trim());
     }
     buffer.writeln('\n👨‍🍳 Pasos de preparación:');
-    for (var i = 0; i < recipe.steps.length; i++) {
-      final step = CulinaryTranslator.translateInstructionStep(recipe.steps[i]);
+    final curatedSteps = CulinaryTranslator.getCuratedSteps(recipe.title);
+    final stepsToShare = curatedSteps ?? recipe.steps;
+    for (var i = 0; i < stepsToShare.length; i++) {
+      final step = CulinaryTranslator.translateInstructionStep(stepsToShare[i]);
       buffer.writeln(' ${i + 1}. $step');
     }
     buffer.writeln('\n— Compartido desde Culina');
@@ -608,49 +610,53 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                       ),
                     ),
                     const SizedBox(height: 14),
-                    ...currentRecipe.steps.asMap().entries.map((entry) {
-                      final stepNum = entry.key + 1;
-                      final instruction = entry.value;
-                      final displayInstruction = CulinaryTranslator.translateInstructionStep(instruction);
+                    ...(){
+                      final curated = CulinaryTranslator.getCuratedSteps(currentRecipe.title);
+                      final rawSteps = curated ?? currentRecipe.steps;
+                      return rawSteps.asMap().entries.map((entry) {
+                        final stepNum = entry.key + 1;
+                        final instruction = entry.value;
+                        final displayInstruction = CulinaryTranslator.translateInstructionStep(instruction);
 
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 16),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Container(
-                              width: 30,
-                              height: 30,
-                              decoration: BoxDecoration(
-                                color: isDark ? const Color(0xFF332A15) : const Color(0xFFF3EFE9),
-                                shape: BoxShape.circle,
-                              ),
-                              child: Center(
-                                child: Text(
-                                  '$stepNum',
-                                  style: GoogleFonts.plusJakartaSans(
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w800,
-                                    color: isDark ? const Color(0xFFFDE68A) : AppColors.textPrimary,
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 16),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Container(
+                                width: 30,
+                                height: 30,
+                                decoration: BoxDecoration(
+                                  color: isDark ? const Color(0xFF332A15) : const Color(0xFFF3EFE9),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    '$stepNum',
+                                    style: GoogleFonts.plusJakartaSans(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w800,
+                                      color: isDark ? const Color(0xFFFDE68A) : AppColors.textPrimary,
+                                    ),
                                   ),
                                 ),
                               ),
-                            ),
-                            const SizedBox(width: 14),
-                            Expanded(
-                              child: Text(
-                                displayInstruction,
-                                style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 13.5,
-                                  height: 1.5,
-                                  color: textColor,
+                              const SizedBox(width: 14),
+                              Expanded(
+                                child: Text(
+                                  displayInstruction,
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontSize: 13.5,
+                                    height: 1.5,
+                                    color: textColor,
+                                  ),
                                 ),
                               ),
-                            ),
-                          ],
-                        ),
-                      );
-                    }),
+                            ],
+                          ),
+                        );
+                      });
+                    }(),
                   ],
                 ),
               ),
