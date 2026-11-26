@@ -1337,7 +1337,7 @@ class CulinaryTranslator {
       ['Flip the fish over and cook for a further 3–5 min until cooked through', 'Da vuelta los filetes y cocina otros 3 a 5 minutos hasta que estén en su punto'],
       ['Spoon the white bean mix into bowls, place the hake on top and finish with the fried bread, chorizo and a little more thyme', 'Sirve el guiso de porotos en platos hondos, corona con la merluza y finaliza con el pan frito, el chorizo y una ramita de tomillo fresco'],
 
-      // Correcciones directas de Spanglish mixto
+      // Normalización de expresiones compuestas y términos combinados
       ['Drain los porotos, Luego tip into a large pan with 2 litres of water', 'Escurre los porotos y colócalos en una olla grande con 2 litros de agua'],
       ['Drain the beans', 'Escurre los porotos'],
       ['Drain los porotos', 'Escurre los porotos'],

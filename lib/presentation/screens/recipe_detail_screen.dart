@@ -320,7 +320,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
               ),
               const SizedBox(height: 14),
 
-              // Calculadora de Porciones en Vivo (Super Intuitiva)
+              // Calculadora dinámica de porciones e ingredientes
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(

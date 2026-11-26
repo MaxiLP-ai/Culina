@@ -16,7 +16,7 @@ class CulinaFoodGraphic extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // If it's the featured rustic toast, or lettuce, let's draw the stylish artisan vector!
+    // Renderizado vectorial para platos con diseño artesanal destacado
     final bool isToast = icon == '🥖' || icon == '🍞' || icon == '🥪';
     final bool isSalad = icon == '🥗' || icon == '🥬';
 
@@ -56,7 +56,7 @@ class CulinaFoodGraphic extends StatelessWidget {
   }
 }
 
-/// Custom painter that draws the stylized yellow/amber toast with bold outline as seen in Figma!
+/// Painter personalizado para ilustración de tostada rústica artesanal
 class _RusticToastPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
@@ -65,21 +65,21 @@ class _RusticToastPainter extends CustomPainter {
     canvas.save();
     canvas.scale(scale);
 
-    // Rotate slightly like in Figma screenshot (-35 degrees)
+    // Inclinación angular estética (-35 grados)
     canvas.translate(50, 50);
     canvas.rotate(-0.55);
     canvas.translate(-50, -50);
 
     final fillPaint = Paint()
-      ..color = const Color(0xFFFFD43F) // Bright golden yellow from mockup
+      ..color = const Color(0xFFFFD43F)
       ..style = PaintingStyle.fill;
 
     final crustPaint = Paint()
-      ..color = const Color(0xFFE89814) // Deep crust amber
+      ..color = const Color(0xFFE89814)
       ..style = PaintingStyle.fill;
 
     final outlinePaint = Paint()
-      ..color = const Color(0xFF1E1E1E) // Bold dark outline
+      ..color = const Color(0xFF1E1E1E)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 4.2
       ..strokeCap = StrokeCap.round
@@ -90,18 +90,18 @@ class _RusticToastPainter extends CustomPainter {
       const Radius.circular(13),
     );
 
-    // Bread background
+    // Base del pan
     canvas.drawRRect(rrect, crustPaint);
     canvas.drawRRect(rrect, outlinePaint);
 
-    // Inside butter/melt layer
+    // Capa interior
     final innerRRect = RRect.fromRectAndRadius(
       const Rect.fromLTWH(24, 34, 52, 18),
       const Radius.circular(9),
     );
     canvas.drawRRect(innerRRect, fillPaint);
 
-    // Crust accent notch
+    // Trazo de corte de corteza
     final notchPaint = Paint()
       ..color = const Color(0xFF1E1E1E)
       ..style = PaintingStyle.stroke
@@ -117,7 +117,7 @@ class _RusticToastPainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
-/// Custom painter for the fresh greens / lettuce leaf graphic as seen on Screen 6!
+/// Painter personalizado para ilustración de hojas verdes de ensalada
 class _FreshSaladPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
@@ -126,7 +126,7 @@ class _FreshSaladPainter extends CustomPainter {
     canvas.save();
     canvas.scale(scale);
 
-    // Rotate slightly like in screenshot
+    // Inclinación angular
     canvas.translate(50, 50);
     canvas.rotate(-0.6);
     canvas.translate(-50, -50);

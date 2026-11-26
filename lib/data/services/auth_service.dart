@@ -34,11 +34,11 @@ class AuthService {
 
   Future<bool> isLoggedIn() async {
     final prefs = await SharedPreferences.getInstance();
-    return prefs.getBool(_kLoggedInKey) ?? true; // default true for immediate demo experience, can toggle
+    return prefs.getBool(_kLoggedInKey) ?? true;
   }
 
   Future<UserProfile> login(String email, String password) async {
-    // Simulate network delay
+    // Simulación asíncrona de autenticación
     await Future.delayed(const Duration(milliseconds: 600));
 
     final prefs = await SharedPreferences.getInstance();
